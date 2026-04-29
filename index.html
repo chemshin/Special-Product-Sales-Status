@@ -109,6 +109,46 @@
     font-weight: 500;
   }
 
+  .refresh-btn {
+    margin-top: 8px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-mute);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .refresh-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .refresh-btn.loading {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .refresh-btn.loading::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border: 1.5px solid var(--text-mute);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
   .summary {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -166,11 +206,11 @@
   }
 
   .stat-value {
-    font-family: 'Fraunces', serif;
-    font-size: 24px;
-    font-weight: 600;
+    font-family: 'IBM Plex Sans KR', -apple-system, sans-serif;
+    font-size: 26px;
+    font-weight: 700;
     line-height: 1.1;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
   }
 
   .stat-value .unit {
@@ -274,9 +314,7 @@
     color: var(--text-mute);
   }
 
-  .table-scroll {
-    overflow-x: auto;
-  }
+  .table-scroll { overflow-x: auto; }
 
   table {
     width: 100%;
@@ -304,18 +342,11 @@
     transition: background 0.15s ease;
   }
 
-  tbody tr:hover {
-    background: var(--bg-elevated);
-  }
-
+  tbody tr:hover { background: var(--bg-elevated); }
   tbody tr:last-child { border-bottom: none; }
 
-  tbody tr.internal {
-    background: #faf6f8;
-  }
-  tbody tr.internal:hover {
-    background: #f5eff2;
-  }
+  tbody tr.internal { background: #faf6f8; }
+  tbody tr.internal:hover { background: #f5eff2; }
 
   tbody td {
     padding: 13px 16px;
@@ -403,21 +434,8 @@
   .badge.internal { background: var(--purple-soft); color: var(--purple); }
   .badge.internal::before { background: var(--purple); }
 
-  .note {
-    margin-top: 14px;
-    padding: 12px 16px;
-    background: var(--bg-soft);
-    border-radius: 10px;
-    border-left: 2px solid var(--accent);
-    font-size: 12.5px;
-    color: var(--text-soft);
-    line-height: 1.7;
-  }
-
-  .note strong {
-    color: var(--text);
-    font-weight: 600;
-  }
+  .badge.unknown { background: var(--bg-soft); color: var(--text-mute); }
+  .badge.unknown::before { background: var(--text-mute); }
 
   .seat-block {
     padding: 22px 24px;
@@ -461,6 +479,7 @@
     height: 100%;
     background: linear-gradient(90deg, var(--accent), var(--gold));
     border-radius: 4px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .seat-pct {
@@ -500,6 +519,58 @@
     line-height: 1.6;
   }
 
+  /* Loading state */
+  .loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(250, 250, 247, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    transition: opacity 0.3s;
+  }
+
+  .loading-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .loading-text {
+    margin-top: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-mute);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .loading-content {
+    text-align: center;
+  }
+
+  /* Error state */
+  .error-banner {
+    background: var(--red-soft);
+    border: 1px solid var(--red);
+    color: var(--red);
+    padding: 14px 20px;
+    border-radius: 10px;
+    margin-bottom: 24px;
+    font-size: 13px;
+  }
+
+  .error-banner strong { font-weight: 600; }
+
   @media (max-width: 1100px) {
     .summary { grid-template-columns: repeat(2, 1fr); }
   }
@@ -515,6 +586,15 @@
 </style>
 </head>
 <body>
+
+<!-- 로딩 오버레이 -->
+<div class="loading-overlay" id="loading">
+  <div class="loading-content">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">데이터 로딩 중</div>
+  </div>
+</div>
+
 <div class="wrap">
 
   <header>
@@ -524,64 +604,40 @@
     </div>
     <div class="meta">
       <strong>2026 Q2</strong><br>
-      <span>Updated 2026.04.29</span>
+      <span id="updated-at">로딩 중...</span><br>
+      <button class="refresh-btn" id="refresh-btn" onclick="loadData()">새로고침</button>
     </div>
   </header>
+
+  <div id="error-container"></div>
 
   <!-- ============ 상단 요약 ============ -->
   <div class="summary">
 
     <div class="summary-card">
       <div class="summary-title">임윤찬 티켓 패키지</div>
-      <div class="summary-stats">
-        <div class="stat">
-          <span class="stat-label">제안</span>
-          <span class="stat-value">11<span class="unit">건</span></span>
-        </div>
-        <div class="stat confirmed">
-          <span class="stat-label">확정</span>
-          <span class="stat-value">2<span class="unit">건</span><span class="amount">0.40억</span></span>
-        </div>
-        <div class="stat review">
-          <span class="stat-label">제안중</span>
-          <span class="stat-value">8<span class="unit">건</span></span>
-        </div>
+      <div class="summary-stats" id="lim-summary">
+        <div class="stat"><span class="stat-label">제안</span><span class="stat-value">-</span></div>
+        <div class="stat confirmed"><span class="stat-label">확정</span><span class="stat-value">-</span></div>
+        <div class="stat review"><span class="stat-label">제안중</span><span class="stat-value">-</span></div>
       </div>
     </div>
 
     <div class="summary-card wc">
       <div class="summary-title">2026 월드컵 패키지</div>
-      <div class="summary-stats">
-        <div class="stat">
-          <span class="stat-label">제안</span>
-          <span class="stat-value">14<span class="unit">건</span></span>
-        </div>
-        <div class="stat confirmed">
-          <span class="stat-label">확정</span>
-          <span class="stat-value">1<span class="unit">건</span><span class="amount">1.00억</span></span>
-        </div>
-        <div class="stat review">
-          <span class="stat-label">제안중</span>
-          <span class="stat-value">12<span class="unit">건</span></span>
-        </div>
+      <div class="summary-stats" id="wc-summary">
+        <div class="stat"><span class="stat-label">제안</span><span class="stat-value">-</span></div>
+        <div class="stat confirmed"><span class="stat-label">확정</span><span class="stat-value">-</span></div>
+        <div class="stat review"><span class="stat-label">제안중</span><span class="stat-value">-</span></div>
       </div>
     </div>
 
     <div class="summary-card leaders">
       <div class="summary-title">중앙리더스클럽</div>
-      <div class="summary-stats">
-        <div class="stat">
-          <span class="stat-label">제안</span>
-          <span class="stat-value">0<span class="unit">건</span></span>
-        </div>
-        <div class="stat confirmed">
-          <span class="stat-label">확정</span>
-          <span class="stat-value">0<span class="unit">건</span><span class="amount">0.00억</span></span>
-        </div>
-        <div class="stat review">
-          <span class="stat-label">제안중</span>
-          <span class="stat-value">0<span class="unit">건</span></span>
-        </div>
+      <div class="summary-stats" id="leaders-summary">
+        <div class="stat"><span class="stat-label">제안</span><span class="stat-value">-</span></div>
+        <div class="stat confirmed"><span class="stat-label">확정</span><span class="stat-value">-</span></div>
+        <div class="stat review"><span class="stat-label">제안중</span><span class="stat-value">-</span></div>
       </div>
     </div>
   </div>
@@ -595,29 +651,8 @@
     </div>
 
     <div class="panel">
-      <div class="panel-meta">
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <span class="pill"><span class="key">개런티</span> R 200석</span>
-          <span class="pill"><span class="key">개런티 금액</span> 150,000</span>
-        </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <span class="pill"><span class="key">확정 매수</span> 40석</span>
-          <span class="pill"><span class="key">잔여</span> 160석</span>
-        </div>
-      </div>
-
-      <!-- 좌석 진행률 -->
-      <div class="seat-block">
-        <div class="seat-row">
-          <span class="seat-label">R석 확정 진행률</span>
-          <span class="seat-value">40 <span class="target">/ 200석 (개런티)</span></span>
-        </div>
-        <div class="seat-bar">
-          <div class="seat-fill" style="width: 20%"></div>
-        </div>
-        <div class="seat-pct">20.0%</div>
-      </div>
-
+      <div class="panel-meta" id="lim-meta"></div>
+      <div class="seat-block" id="lim-seat"></div>
       <div class="table-scroll">
         <table id="lim-table">
           <thead>
@@ -637,23 +672,8 @@
             </tr>
           </thead>
           <tbody></tbody>
-          <tfoot>
-            <tr>
-              <td colspan="4">합계</td>
-              <td class="num">165</td>
-              <td colspan="3"></td>
-              <td class="num">245,000</td>
-              <td class="num">60,000</td>
-              <td class="num">25,000</td>
-              <td></td>
-            </tr>
-          </tfoot>
+          <tfoot></tfoot>
         </table>
-      </div>
-
-      <div class="note" style="margin: 16px 24px 24px;">
-        <strong>요약</strong> — 개런티 R 200석 / 확정 매수 40석 / 잔여 160석 ·
-        확정 2건 (프레드 4천만 + 내부VIP) · 최종협의 2건 (불가리·피아제) · 협의 3건 · 검토중 4건
       </div>
     </div>
   </section>
@@ -672,12 +692,8 @@
           <strong>패키지 정단가</strong> 하이라이트 170,000천원 (제안가 110,000) ·
           정보전달 영역 50,000천원 · PV권 별도 협의
         </div>
-        <div>
-          <strong>총 파이프라인</strong> 8.6억 ·
-          <strong>확정</strong> 1.0억
-        </div>
+        <div id="wc-pipeline"></div>
       </div>
-
       <div class="table-scroll">
         <table id="wc-table">
           <thead>
@@ -692,13 +708,7 @@
             </tr>
           </thead>
           <tbody></tbody>
-          <tfoot>
-            <tr>
-              <td colspan="4">합계</td>
-              <td class="num">8.6억</td>
-              <td colspan="2"></td>
-            </tr>
-          </tfoot>
+          <tfoot></tfoot>
         </table>
       </div>
     </div>
@@ -717,100 +727,319 @@
         <div>
           <strong>제안 패키지</strong> 스탠다드 / 프리미엄
         </div>
-        <div>
-          <strong>제안 0건</strong> · 데이터 입력 대기
-        </div>
+        <div id="leaders-pipeline"></div>
       </div>
-
-      <div class="empty-state">
-        <div class="empty-icon">◷</div>
-        <div class="empty-title">제안 데이터 입력 대기 중</div>
-        <div class="empty-desc">시트에 광고주별 제안 정보가 입력되면 이 영역에 자동으로 표시됩니다.</div>
-      </div>
+      <div id="leaders-content"></div>
     </div>
   </section>
 
 </div>
 
 <script>
-  // ===== 임윤찬 카메라타 짤쯔부르크 (2026.4.29 기준) =====
-  const limData = [
-    { date: '미정', adv: '프레드',       r: 20, team: '마솔1팀', mgr: '이종석', pkg: 'CPMT(0.5) + AP(0.5)', price: 40000, status: 'confirmed',    statusLabel: '확정',         show: 15000, bs: 25000, note: '' },
-    { date: '미정', adv: '불가리',       r: 25, team: '마솔1팀', mgr: '이종석', pkg: '',                    price: 25000, status: 'final-review', statusLabel: '최종 협의 중', show: 25000, bs: 0,     note: '장당 1백만원 (티켓 온리)' },
-    { date: '미정', adv: '피아제',       r: 20, team: '마솔1팀', mgr: '이종석', pkg: '',                    price: 20000, status: 'final-review', statusLabel: '최종 협의 중', show: 20000, bs: 0,     note: '장당 1백만원 (티켓 온리)' },
-    { date: '미정', adv: '그라프',       r: 0,  team: '마솔1팀', mgr: '이종석', pkg: '',                    price: 0,     status: 'review',       statusLabel: '협의 중',      show: 0,     bs: 0,     note: '' },
-    { date: '미정', adv: '셀린느',       r: 0,  team: '마솔1팀', mgr: '이종석', pkg: '',                    price: 0,     status: 'review',       statusLabel: '협의 중',      show: 0,     bs: 0,     note: '' },
-    { date: '',     adv: '발렌티노',     r: 0,  team: '마솔1팀', mgr: '이종석', pkg: '',                    price: 0,     status: 'review',       statusLabel: '협의 중',      show: 0,     bs: 0,     note: '' },
-    { date: '미정', adv: '베스트슬립',   r: 20, team: '마솔3팀', mgr: '김태헌', pkg: 'CPMT(0.5) + AP(0.5)', price: 40000, status: 'canceled',     statusLabel: '미집행',       show: 0,     bs: 0,     note: '월드컵 관련 매체 광고집행에 주력' },
-    { date: '미정', adv: '컴포즈',       r: 20, team: '마솔3팀', mgr: '김태헌', pkg: 'CPMT(0.5) + AP(0.5)', price: 40000, status: 'review',       statusLabel: '미정',         show: 0,     bs: 0,     note: '내부검토 하겠다고 함' },
-    { date: '미정', adv: '르무통',       r: 20, team: '마솔3팀', mgr: '김선용', pkg: 'CPMT(0.5) + AP(0.5)', price: 40000, status: 'review',       statusLabel: '미정',         show: 0,     bs: 0,     note: '내부검토중' },
-    { date: '미정', adv: '헥토헬스케어', r: 20, team: '마솔3팀', mgr: '김선용', pkg: 'CPMT(0.5) + AP(0.5)', price: 40000, status: 'review',       statusLabel: '미정',         show: 0,     bs: 0,     note: '내부검토중' },
-    { date: '미정', adv: '내부 VIP용',   r: 20, team: '솔기1팀', mgr: '신동민', pkg: '내부 활용',           price: 0,     status: 'internal',     statusLabel: '확정 (내부)',  show: 0,     bs: 0,     note: '' },
-  ];
+  // ===== GAS Web App URL =====
+  // 배포 후 발급받은 URL을 여기에 붙여넣으세요
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbyP0mybcCfcpnSreGXPKhWoavdWuzvWgXBdS88uhrNkmnMnLp0sTcnpwCQe7nJqNvLh/exec';
 
-  // ===== 월드컵 데이터 =====
-  const wcData = [
-    { adv: '체육진흥공단',    mgr: '-',     pkg: '타운보드',                              amt: 0.5, status: 'review',   note: '제안서 전달, 검토중' },
-    { adv: '베스트슬립',      mgr: '김태헌', pkg: '타운보드 하이라이트 + 정보전달영역',    amt: 1.0, status: 'review',   note: '검토중' },
-    { adv: '굽네치킨',        mgr: '김태헌', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'review',   note: '검토중' },
-    { adv: '도미노피자',      mgr: '김태헌', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'canceled', note: '예산부족 (지역광고 우선)' },
-    { adv: '르무통',          mgr: '김선용', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'review',   note: '검토중' },
-    { adv: '헥토헬스케어',    mgr: '김선용', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'review',   note: '검토중' },
-    { adv: '한국스포츠레저',  mgr: '김선용', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'review',   note: '검토중' },
-    { adv: '벨롭(GTS글로벌)', mgr: '김선용', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'review',   note: '관심은 있으나 예산부족' },
-    { adv: '시다스',          mgr: '김선용', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'review',   note: '검토중' },
-    { adv: '바크(BARC)',      mgr: '김선용', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'review',   note: '검토중' },
-    { adv: 'SKT',             mgr: '강승한', pkg: '타운보드 하이라이트',                   amt: 1.1, status: 'review',   note: '예산부족으로 부정적' },
-    { adv: '넥슨',            mgr: '김언섭', pkg: '타운보드 하이라이트',                   amt: 1.0, status: 'confirmed', note: '확정' },
-    { adv: '틱톡',            mgr: '김언섭', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'review',   note: '검토중' },
-    { adv: '닌텐도',          mgr: '김언섭', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'review',   note: '검토중' },
-  ];
+  // ===== Helpers =====
+  const fmt = n => Number(n || 0).toLocaleString('ko-KR');
 
-  const fmt = n => n.toLocaleString('ko-KR');
-  const wcStatusLabel = {
-    confirmed: { label: '확정',   cls: 'confirmed' },
-    review:    { label: '검토중', cls: 'review'    },
-    canceled:  { label: '미집행', cls: 'canceled'  },
-  };
+  // 상황 텍스트 → 뱃지 클래스 매핑
+  function statusClass(label) {
+    if (!label) return 'unknown';
+    const s = String(label).trim();
+    if (s === '확정' || s === '진행 확정' || s === '계산서 발행' || s.startsWith('계산서')) return 'confirmed';
+    if (s === '확정 (내부)' || s.includes('내부')) return 'internal';
+    if (s === '최종 협의 중' || s === '최종협의중') return 'final-review';
+    if (s === '미집행' || s === '취소' || s === '드랍') return 'canceled';
+    if (s === '협의 중' || s === '협의중' || s === '미정' || s === '검토중' || s.includes('검토')) return 'review';
+    return 'unknown';
+  }
 
-  // 임윤찬 테이블
-  const limBody = document.querySelector('#lim-table tbody');
-  limData.forEach((d, i) => {
-    const tr = document.createElement('tr');
-    if (d.status === 'internal') tr.classList.add('internal');
-    tr.innerHTML = `
-      <td style="color:var(--text-mute)">${i + 1}</td>
-      <td><span class="badge ${d.status}">${d.statusLabel}</span></td>
-      <td>${d.date || '-'}</td>
-      <td class="advertiser">${d.adv}</td>
-      <td class="num ${d.r ? '' : 'empty'}">${d.r || '-'}</td>
-      <td class="team">${d.team}</td>
-      <td>${d.mgr}</td>
-      <td class="package">${d.pkg || '-'}</td>
-      <td class="num ${d.price ? '' : 'empty'}">${d.price ? fmt(d.price) : '-'}</td>
-      <td class="num ${d.show ? '' : 'empty'}">${d.show ? fmt(d.show) : '-'}</td>
-      <td class="num ${d.bs ? '' : 'empty'}">${d.bs ? fmt(d.bs) : '-'}</td>
-      <td style="color:var(--text-mute);font-size:12px">${d.note}</td>
+  // 상황 → 카테고리 (요약 카운트용)
+  function statusBucket(label) {
+    const cls = statusClass(label);
+    if (cls === 'confirmed' || cls === 'internal') return 'confirmed';
+    return 'pending';
+  }
+
+  // ===== 메인 =====
+  async function loadData() {
+    const refreshBtn = document.getElementById('refresh-btn');
+    const errorContainer = document.getElementById('error-container');
+    refreshBtn.classList.add('loading');
+    errorContainer.innerHTML = '';
+
+    if (GAS_URL === 'YOUR_GAS_URL_HERE') {
+      showError('GAS_URL이 설정되지 않았습니다. HTML 파일을 열어 GAS_URL 상수에 배포된 웹 앱 URL을 붙여넣으세요.');
+      document.getElementById('loading').classList.add('hidden');
+      refreshBtn.classList.remove('loading');
+      return;
+    }
+
+    try {
+      const res = await fetch(GAS_URL);
+      const data = await res.json();
+
+      if (data.error) throw new Error(data.error);
+
+      renderLim(data.lim);
+      renderWc(data.wc);
+      renderLeaders(data.leaders);
+
+      // updated 시각
+      const updated = new Date(data.updatedAt);
+      document.getElementById('updated-at').textContent =
+        'Updated ' + updated.toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+      document.getElementById('loading').classList.add('hidden');
+    } catch (err) {
+      showError('데이터를 불러오는 중 오류가 발생했습니다: ' + err.message);
+      document.getElementById('loading').classList.add('hidden');
+    } finally {
+      refreshBtn.classList.remove('loading');
+    }
+  }
+
+  function showError(msg) {
+    document.getElementById('error-container').innerHTML =
+      `<div class="error-banner"><strong>오류</strong> · ${msg}</div>`;
+  }
+
+  // ===== 임윤찬 렌더 =====
+  function renderLim(lim) {
+    if (!lim) return;
+
+    // 요약 카드
+    const total = lim.items.length;
+    const confirmed = lim.items.filter(d => statusBucket(d.statusLabel) === 'confirmed');
+    const pending   = lim.items.filter(d => statusBucket(d.statusLabel) === 'pending');
+    const confirmedAmt = confirmed.reduce((s, d) => s + (Number(d.price) || 0), 0);
+
+    document.getElementById('lim-summary').innerHTML = `
+      <div class="stat">
+        <span class="stat-label">제안</span>
+        <span class="stat-value">${total}<span class="unit">건</span></span>
+      </div>
+      <div class="stat confirmed">
+        <span class="stat-label">확정</span>
+        <span class="stat-value">${confirmed.length}<span class="unit">건</span><span class="amount">${(confirmedAmt/100000).toFixed(2)}억</span></span>
+      </div>
+      <div class="stat review">
+        <span class="stat-label">제안중</span>
+        <span class="stat-value">${pending.length}<span class="unit">건</span></span>
+      </div>
     `;
-    limBody.appendChild(tr);
-  });
 
-  // 월드컵 테이블
-  const wcBody = document.querySelector('#wc-table tbody');
-  wcData.forEach((d, i) => {
-    const sl = wcStatusLabel[d.status];
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td style="color:var(--text-mute)">${i + 1}</td>
-      <td><span class="badge ${sl.cls}">${sl.label}</span></td>
-      <td class="advertiser">${d.adv}</td>
-      <td>${d.mgr}</td>
-      <td class="package">${d.pkg}</td>
-      <td class="num">${d.amt}억</td>
-      <td style="color:var(--text-mute);font-size:12px">${d.note}</td>
+    // 패널 메타 (개런티/잔여)
+    document.getElementById('lim-meta').innerHTML = `
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <span class="pill"><span class="key">개런티</span> R ${lim.guarantee}석</span>
+        <span class="pill"><span class="key">개런티 금액</span> ${fmt(lim.guaranteeAmount)}</span>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <span class="pill"><span class="key">확정 매수</span> ${lim.totals.r}석</span>
+        <span class="pill"><span class="key">잔여</span> ${lim.guarantee - lim.totals.r}석</span>
+      </div>
     `;
-    wcBody.appendChild(tr);
-  });
+
+    // 좌석 진행률
+    const pct = lim.guarantee > 0 ? (lim.totals.r / lim.guarantee * 100) : 0;
+    document.getElementById('lim-seat').innerHTML = `
+      <div class="seat-row">
+        <span class="seat-label">R석 확정 진행률</span>
+        <span class="seat-value">${lim.totals.r} <span class="target">/ ${lim.guarantee}석 (개런티)</span></span>
+      </div>
+      <div class="seat-bar">
+        <div class="seat-fill" style="width: ${Math.min(pct, 100)}%"></div>
+      </div>
+      <div class="seat-pct">${pct.toFixed(1)}%</div>
+    `;
+
+    // 테이블
+    const tbody = document.querySelector('#lim-table tbody');
+    tbody.innerHTML = '';
+    lim.items.forEach((d, i) => {
+      const cls = statusClass(d.statusLabel);
+      const tr = document.createElement('tr');
+      if (cls === 'internal') tr.classList.add('internal');
+      tr.innerHTML = `
+        <td style="color:var(--text-mute)">${i + 1}</td>
+        <td><span class="badge ${cls}">${d.statusLabel || '-'}</span></td>
+        <td>${d.date || '-'}</td>
+        <td class="advertiser">${d.adv}</td>
+        <td class="num ${d.r ? '' : 'empty'}">${d.r || '-'}</td>
+        <td class="team">${d.team || '-'}</td>
+        <td>${d.mgr || '-'}</td>
+        <td class="package">${d.pkg || '-'}</td>
+        <td class="num ${d.price ? '' : 'empty'}">${d.price ? fmt(d.price) : '-'}</td>
+        <td class="num ${d.show ? '' : 'empty'}">${d.show ? fmt(d.show) : '-'}</td>
+        <td class="num ${d.bs ? '' : 'empty'}">${d.bs ? fmt(d.bs) : '-'}</td>
+        <td style="color:var(--text-mute);font-size:12px">${d.note || ''}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // tfoot 합계
+    document.querySelector('#lim-table tfoot').innerHTML = `
+      <tr>
+        <td colspan="4">합계</td>
+        <td class="num">${fmt(lim.totals.r)}</td>
+        <td colspan="3"></td>
+        <td class="num">${fmt(lim.totals.price)}</td>
+        <td class="num">${fmt(lim.totals.show)}</td>
+        <td class="num">${fmt(lim.totals.bs)}</td>
+        <td></td>
+      </tr>
+    `;
+  }
+
+  // ===== 월드컵 렌더 =====
+  function renderWc(wc) {
+    if (!wc) return;
+    const items = wc.items;
+
+    const total = items.length;
+    const confirmed = items.filter(d => statusBucket(d.statusLabel) === 'confirmed');
+    const pending   = items.filter(d => statusBucket(d.statusLabel) === 'pending');
+    const confirmedAmt = confirmed.reduce((s, d) => s + (Number(d.amt) || 0), 0);
+    const totalPipeline = items.reduce((s, d) => s + (Number(d.amt) || 0), 0);
+
+    document.getElementById('wc-summary').innerHTML = `
+      <div class="stat">
+        <span class="stat-label">제안</span>
+        <span class="stat-value">${total}<span class="unit">건</span></span>
+      </div>
+      <div class="stat confirmed">
+        <span class="stat-label">확정</span>
+        <span class="stat-value">${confirmed.length}<span class="unit">건</span><span class="amount">${confirmedAmt.toFixed(2)}억</span></span>
+      </div>
+      <div class="stat review">
+        <span class="stat-label">제안중</span>
+        <span class="stat-value">${pending.length}<span class="unit">건</span></span>
+      </div>
+    `;
+
+    document.getElementById('wc-pipeline').innerHTML =
+      `<strong>총 파이프라인</strong> ${totalPipeline.toFixed(1)}억 · <strong>확정</strong> ${confirmedAmt.toFixed(1)}억`;
+
+    const tbody = document.querySelector('#wc-table tbody');
+    tbody.innerHTML = '';
+    items.forEach((d, i) => {
+      const cls = statusClass(d.statusLabel);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="color:var(--text-mute)">${i + 1}</td>
+        <td><span class="badge ${cls}">${d.statusLabel || '-'}</span></td>
+        <td class="advertiser">${d.adv}</td>
+        <td>${d.mgr || '-'}</td>
+        <td class="package">${d.pkg || '-'}</td>
+        <td class="num">${d.amt}억</td>
+        <td style="color:var(--text-mute);font-size:12px">${d.note || ''}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.querySelector('#wc-table tfoot').innerHTML = `
+      <tr>
+        <td colspan="5">합계</td>
+        <td class="num">${totalPipeline.toFixed(1)}억</td>
+        <td></td>
+      </tr>
+    `;
+  }
+
+  // ===== 중앙리더스클럽 렌더 =====
+  function renderLeaders(leaders) {
+    if (!leaders) return;
+    const items = leaders.items;
+
+    const total = items.length;
+    const confirmed = items.filter(d => statusBucket(d.statusLabel) === 'confirmed');
+    const pending   = items.filter(d => statusBucket(d.statusLabel) === 'pending');
+    const confirmedAmt = confirmed.reduce((s, d) => s + (Number(d.price) || 0), 0);
+    const totalAmt = items.reduce((s, d) => s + (Number(d.price) || 0), 0);
+
+    document.getElementById('leaders-summary').innerHTML = `
+      <div class="stat">
+        <span class="stat-label">제안</span>
+        <span class="stat-value">${total}<span class="unit">건</span></span>
+      </div>
+      <div class="stat confirmed">
+        <span class="stat-label">확정</span>
+        <span class="stat-value">${confirmed.length}<span class="unit">건</span><span class="amount">${(confirmedAmt/100000).toFixed(2)}억</span></span>
+      </div>
+      <div class="stat review">
+        <span class="stat-label">제안중</span>
+        <span class="stat-value">${pending.length}<span class="unit">건</span></span>
+      </div>
+    `;
+
+    document.getElementById('leaders-pipeline').innerHTML = total > 0
+      ? `<strong>총 ${total}건</strong> · ${fmt(totalAmt)}천원`
+      : `<strong>제안 0건</strong> · 데이터 입력 대기`;
+
+    const container = document.getElementById('leaders-content');
+
+    if (items.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">◷</div>
+          <div class="empty-title">제안 데이터 입력 대기 중</div>
+          <div class="empty-desc">시트에 광고주별 제안 정보가 입력되면 이 영역에 자동으로 표시됩니다.</div>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="table-scroll">
+        <table id="leaders-table">
+          <thead>
+            <tr>
+              <th style="width:40px">#</th>
+              <th>현황</th>
+              <th>매출시점</th>
+              <th>광고주</th>
+              <th>대행사</th>
+              <th>담당자</th>
+              <th>패키지</th>
+              <th class="num">금액</th>
+              <th>비고</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="7">합계</td>
+              <td class="num">${fmt(totalAmt)}</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    `;
+
+    const tbody = container.querySelector('tbody');
+    items.forEach((d, i) => {
+      const cls = statusClass(d.statusLabel);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="color:var(--text-mute)">${i + 1}</td>
+        <td><span class="badge ${cls}">${d.statusLabel || '-'}</span></td>
+        <td>${d.date || '-'}</td>
+        <td class="advertiser">${d.adv}</td>
+        <td>${d.agency || '-'}</td>
+        <td>${d.mgr || '-'}</td>
+        <td class="package">${d.pkg || '-'}</td>
+        <td class="num ${d.price ? '' : 'empty'}">${d.price ? fmt(d.price) : '-'}</td>
+        <td style="color:var(--text-mute);font-size:12px">${d.note || ''}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // 초기 로드
+  loadData();
 </script>
 </body>
 </html>
