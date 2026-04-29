@@ -418,7 +418,6 @@
     font-weight: 600;
   }
 
-  /* 좌석 진행 게이지 */
   .seat-block {
     padding: 22px 24px;
     background: linear-gradient(180deg, #fdfbf6 0%, #ffffff 100%);
@@ -548,24 +547,23 @@
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <span class="pill"><span class="key">개런티</span> R 200석</span>
           <span class="pill"><span class="key">개런티 금액</span> 150,000</span>
-          <span class="pill"><span class="key">공연 매출</span> 60,000</span>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <span class="pill"><span class="key">판매</span> 165석</span>
-          <span class="pill"><span class="key">잔여</span> 35석</span>
+          <span class="pill"><span class="key">확정 매수</span> 40석</span>
+          <span class="pill"><span class="key">잔여</span> 160석</span>
         </div>
       </div>
 
       <!-- 좌석 진행률 -->
       <div class="seat-block">
         <div class="seat-row">
-          <span class="seat-label">R석 판매 진행률</span>
-          <span class="seat-value">165 <span class="target">/ 200석</span></span>
+          <span class="seat-label">R석 확정 진행률</span>
+          <span class="seat-value">40 <span class="target">/ 200석 (개런티)</span></span>
         </div>
         <div class="seat-bar">
-          <div class="seat-fill" style="width: 82.5%"></div>
+          <div class="seat-fill" style="width: 20%"></div>
         </div>
-        <div class="seat-pct">82.5%</div>
+        <div class="seat-pct">20.0%</div>
       </div>
 
       <div class="table-scroll">
@@ -573,6 +571,7 @@
           <thead>
             <tr>
               <th style="width:40px">#</th>
+              <th>상황</th>
               <th>매출시점</th>
               <th>광고주</th>
               <th class="num">R석</th>
@@ -580,7 +579,6 @@
               <th>담당자</th>
               <th>패키지</th>
               <th class="num">금액</th>
-              <th>상황</th>
               <th class="num">공연매출</th>
               <th class="num">비솔매출</th>
               <th>비고</th>
@@ -589,11 +587,10 @@
           <tbody></tbody>
           <tfoot>
             <tr>
-              <td colspan="3">합계</td>
+              <td colspan="4">합계</td>
               <td class="num">165</td>
               <td colspan="3"></td>
               <td class="num">245,000</td>
-              <td></td>
               <td class="num">60,000</td>
               <td class="num">25,000</td>
               <td></td>
@@ -603,7 +600,7 @@
       </div>
 
       <div class="note" style="margin: 16px 24px 24px;">
-        <strong>요약</strong> — R 200석 개런티 / 현재 165석 배정 / 잔여 35석 ·
+        <strong>요약</strong> — 개런티 R 200석 / 확정 매수 40석 / 잔여 160석 ·
         확정 2건 (프레드 4천만 + 내부VIP) · 최종협의 2건 (불가리·피아제) · 협의 3건 · 검토중 4건
       </div>
     </div>
@@ -634,11 +631,11 @@
           <thead>
             <tr>
               <th style="width:40px">#</th>
+              <th>상황</th>
               <th>광고주</th>
               <th>담당자</th>
               <th>패키지</th>
               <th class="num">금액</th>
-              <th>상황</th>
               <th>비고</th>
             </tr>
           </thead>
@@ -658,9 +655,9 @@
 </div>
 
 <script>
-  // ===== 임윤찬 카메라타 짤쯔부르크 시트 =====
+  // ===== 임윤찬 카메라타 짤쯔부르크 (2026.4.29 기준) =====
   const limData = [
-    { date: '미정', adv: '프레드',       r: 20, team: '마솔1팀', mgr: '이종석', pkg: 'CPMT(0.5) + AP(0.5)', price: 40000, status: 'confirmed',    statusLabel: '진행 확정',    show: 15000, bs: 25000, note: '' },
+    { date: '미정', adv: '프레드',       r: 20, team: '마솔1팀', mgr: '이종석', pkg: 'CPMT(0.5) + AP(0.5)', price: 40000, status: 'confirmed',    statusLabel: '확정',         show: 15000, bs: 25000, note: '' },
     { date: '미정', adv: '불가리',       r: 25, team: '마솔1팀', mgr: '이종석', pkg: '',                    price: 25000, status: 'final-review', statusLabel: '최종 협의 중', show: 25000, bs: 0,     note: '장당 1백만원 (티켓 온리)' },
     { date: '미정', adv: '피아제',       r: 20, team: '마솔1팀', mgr: '이종석', pkg: '',                    price: 20000, status: 'final-review', statusLabel: '최종 협의 중', show: 20000, bs: 0,     note: '장당 1백만원 (티켓 온리)' },
     { date: '미정', adv: '그라프',       r: 0,  team: '마솔1팀', mgr: '이종석', pkg: '',                    price: 0,     status: 'review',       statusLabel: '협의 중',      show: 0,     bs: 0,     note: '' },
@@ -673,7 +670,7 @@
     { date: '미정', adv: '내부 VIP용',   r: 20, team: '솔기1팀', mgr: '신동민', pkg: '내부 활용',           price: 0,     status: 'internal',     statusLabel: '확정 (내부)',  show: 0,     bs: 0,     note: '' },
   ];
 
-  // ===== 월드컵 데이터 (억) =====
+  // ===== 월드컵 데이터 =====
   const wcData = [
     { adv: '체육진흥공단',    mgr: '-',     pkg: '타운보드',                              amt: 0.5, status: 'review',   note: '제안서 전달, 검토중' },
     { adv: '베스트슬립',      mgr: '김태헌', pkg: '타운보드 하이라이트 + 정보전달영역',    amt: 1.0, status: 'review',   note: '검토중' },
@@ -705,6 +702,7 @@
     if (d.status === 'internal') tr.classList.add('internal');
     tr.innerHTML = `
       <td style="color:var(--text-mute)">${i + 1}</td>
+      <td><span class="badge ${d.status}">${d.statusLabel}</span></td>
       <td>${d.date || '-'}</td>
       <td class="advertiser">${d.adv}</td>
       <td class="num ${d.r ? '' : 'empty'}">${d.r || '-'}</td>
@@ -712,7 +710,6 @@
       <td>${d.mgr}</td>
       <td class="package">${d.pkg || '-'}</td>
       <td class="num ${d.price ? '' : 'empty'}">${d.price ? fmt(d.price) : '-'}</td>
-      <td><span class="badge ${d.status}">${d.statusLabel}</span></td>
       <td class="num ${d.show ? '' : 'empty'}">${d.show ? fmt(d.show) : '-'}</td>
       <td class="num ${d.bs ? '' : 'empty'}">${d.bs ? fmt(d.bs) : '-'}</td>
       <td style="color:var(--text-mute);font-size:12px">${d.note}</td>
@@ -727,11 +724,11 @@
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td style="color:var(--text-mute)">${i + 1}</td>
+      <td><span class="badge ${sl.cls}">${sl.label}</span></td>
       <td class="advertiser">${d.adv}</td>
       <td>${d.mgr}</td>
       <td class="package">${d.pkg}</td>
       <td class="num">${d.amt}억</td>
-      <td><span class="badge ${sl.cls}">${sl.label}</span></td>
       <td style="color:var(--text-mute);font-size:12px">${d.note}</td>
     `;
     wcBody.appendChild(tr);
