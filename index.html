@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5월 주요 상품 판매 현황 | 비솔본부</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafaf7;
+    --bg-soft: #f3f3ee;
+    --bg-card: #ffffff;
+    --bg-elevated: #f7f7f2;
+    --border: #e4e2da;
+    --border-soft: #ececdf;
+    --text: #1a1d24;
+    --text-soft: #4a4f5c;
+    --text-mute: #8a8f9c;
+    --accent: #8b6f3f;
+    --accent-soft: #8b6f3f15;
+    --gold: #b8945f;
+    --green: #3d8a5a;
+    --green-soft: #3d8a5a15;
+    --amber: #b8801f;
+    --amber-soft: #b8801f15;
+    --red: #b14545;
+    --red-soft: #b1454515;
+    --blue: #4a78a8;
+    --blue-soft: #4a78a815;
+    --purple: #7a5a9e;
+    --purple-soft: #7a5a9e15;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Sans KR', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .brand-mark {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-mute);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .brand-mark::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 42px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--text);
+  }
+
+  h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+
+  .meta {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-mute);
+    line-height: 1.8;
+  }
+
+  .meta strong {
+    color: var(--text-soft);
+    font-weight: 500;
+  }
+
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .summary-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px 28px;
+    position: relative;
+  }
+
+  .summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+    background: var(--accent);
+    border-radius: 14px 14px 0 0;
+  }
+
+  .summary-card.wc::before { background: var(--blue); }
+
+  .summary-title {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 18px;
+    letter-spacing: -0.01em;
+  }
+
+  .summary-stats {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 100px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+  }
+
+  .stat-value {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+
+  .stat-value .unit {
+    font-size: 13px;
+    color: var(--text-mute);
+    margin-left: 3px;
+    font-weight: 400;
+  }
+
+  .stat-value .amount {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--green);
+    margin-left: 6px;
+    font-weight: 500;
+  }
+
+  .stat.confirmed .stat-value { color: var(--green); }
+  .stat.review .stat-value { color: var(--amber); }
+
+  section.product {
+    margin-bottom: 56px;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+  }
+
+  .section-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-left: auto;
+  }
+
+  .panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .panel-meta {
+    padding: 16px 24px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border-soft);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 12.5px;
+    color: var(--text-soft);
+  }
+
+  .panel-meta strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .panel-meta .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--text);
+  }
+
+  .panel-meta .pill .key {
+    color: var(--text-mute);
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+
+  thead th {
+    text-align: left;
+    padding: 13px 16px;
+    background: var(--bg-soft);
+    color: var(--text-mute);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  thead th.num { text-align: right; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border-soft);
+    transition: background 0.15s ease;
+  }
+
+  tbody tr:hover {
+    background: var(--bg-elevated);
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+
+  tbody tr.internal {
+    background: #faf6f8;
+  }
+  tbody tr.internal:hover {
+    background: #f5eff2;
+  }
+
+  tbody td {
+    padding: 13px 16px;
+    color: var(--text-soft);
+    vertical-align: middle;
+  }
+
+  tbody td.num {
+    font-family: 'JetBrains Mono', monospace;
+    text-align: right;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+
+  tbody td.num.empty {
+    color: var(--text-mute);
+    font-weight: 400;
+  }
+
+  tbody td.advertiser {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  tbody td.package {
+    color: var(--text-soft);
+    font-size: 12.5px;
+    max-width: 280px;
+  }
+
+  tbody td.team {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--text-mute);
+  }
+
+  tfoot td {
+    padding: 16px;
+    background: var(--bg-soft);
+    border-top: 2px solid var(--border);
+    font-weight: 600;
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  tfoot td.num {
+    font-family: 'JetBrains Mono', monospace;
+    text-align: right;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    font-size: 14px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .badge::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+  }
+
+  .badge.confirmed { background: var(--green-soft); color: var(--green); }
+  .badge.confirmed::before { background: var(--green); }
+
+  .badge.final-review { background: var(--blue-soft); color: var(--blue); }
+  .badge.final-review::before { background: var(--blue); }
+
+  .badge.review { background: var(--amber-soft); color: var(--amber); }
+  .badge.review::before { background: var(--amber); }
+
+  .badge.canceled { background: var(--red-soft); color: var(--red); }
+  .badge.canceled::before { background: var(--red); }
+
+  .badge.internal { background: var(--purple-soft); color: var(--purple); }
+  .badge.internal::before { background: var(--purple); }
+
+  .note {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: var(--bg-soft);
+    border-radius: 10px;
+    border-left: 2px solid var(--accent);
+    font-size: 12.5px;
+    color: var(--text-soft);
+    line-height: 1.7;
+  }
+
+  .note strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* 좌석 진행 게이지 */
+  .seat-block {
+    padding: 22px 24px;
+    background: linear-gradient(180deg, #fdfbf6 0%, #ffffff 100%);
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .seat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+
+  .seat-label {
+    font-size: 13px;
+    color: var(--text-soft);
+    font-weight: 500;
+  }
+
+  .seat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .seat-value .target {
+    color: var(--text-mute);
+    font-weight: 400;
+  }
+
+  .seat-bar {
+    height: 8px;
+    background: var(--bg-soft);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .seat-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--gold));
+    border-radius: 4px;
+  }
+
+  .seat-pct {
+    margin-top: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    text-align: right;
+  }
+
+  @media (max-width: 800px) {
+    .wrap { padding: 28px 16px 60px; }
+    h1 { font-size: 28px; }
+    .section-title { font-size: 22px; }
+    .summary { grid-template-columns: 1fr; }
+    .meta { text-align: left; }
+    header { align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="brand-mark">JoongAng Ilbo · 비즈솔루션본부</div>
+      <h1>5월 주요 상품 <em>판매 현황</em></h1>
+    </div>
+    <div class="meta">
+      <strong>2026 Q2</strong><br>
+      <span>Updated 2026.04.29</span>
+    </div>
+  </header>
+
+  <!-- ============ 상단 요약 ============ -->
+  <div class="summary">
+
+    <div class="summary-card">
+      <div class="summary-title">임윤찬 티켓 패키지</div>
+      <div class="summary-stats">
+        <div class="stat">
+          <span class="stat-label">제안</span>
+          <span class="stat-value">11<span class="unit">건</span></span>
+        </div>
+        <div class="stat confirmed">
+          <span class="stat-label">확정</span>
+          <span class="stat-value">2<span class="unit">건</span><span class="amount">0.40억</span></span>
+        </div>
+        <div class="stat review">
+          <span class="stat-label">제안중</span>
+          <span class="stat-value">8<span class="unit">건</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card wc">
+      <div class="summary-title">2026 월드컵 패키지</div>
+      <div class="summary-stats">
+        <div class="stat">
+          <span class="stat-label">제안</span>
+          <span class="stat-value">14<span class="unit">건</span></span>
+        </div>
+        <div class="stat confirmed">
+          <span class="stat-label">확정</span>
+          <span class="stat-value">1<span class="unit">건</span><span class="amount">1.00억</span></span>
+        </div>
+        <div class="stat review">
+          <span class="stat-label">제안중</span>
+          <span class="stat-value">12<span class="unit">건</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 01. 임윤찬 ============ -->
+  <section class="product">
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2 class="section-title">임윤찬 카메라타 — 짤쯔부르크</h2>
+      <span class="section-sub">티켓 판매 현황 및 전망 · 천원 단위</span>
+    </div>
+
+    <div class="panel">
+      <div class="panel-meta">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="pill"><span class="key">개런티</span> R 200석</span>
+          <span class="pill"><span class="key">개런티 금액</span> 150,000</span>
+          <span class="pill"><span class="key">공연 매출</span> 60,000</span>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="pill"><span class="key">판매</span> 165석</span>
+          <span class="pill"><span class="key">잔여</span> 35석</span>
+        </div>
+      </div>
+
+      <!-- 좌석 진행률 -->
+      <div class="seat-block">
+        <div class="seat-row">
+          <span class="seat-label">R석 판매 진행률</span>
+          <span class="seat-value">165 <span class="target">/ 200석</span></span>
+        </div>
+        <div class="seat-bar">
+          <div class="seat-fill" style="width: 82.5%"></div>
+        </div>
+        <div class="seat-pct">82.5%</div>
+      </div>
+
+      <div class="table-scroll">
+        <table id="lim-table">
+          <thead>
+            <tr>
+              <th style="width:40px">#</th>
+              <th>매출시점</th>
+              <th>광고주</th>
+              <th class="num">R석</th>
+              <th>담당팀</th>
+              <th>담당자</th>
+              <th>패키지</th>
+              <th class="num">금액</th>
+              <th>상황</th>
+              <th class="num">공연매출</th>
+              <th class="num">비솔매출</th>
+              <th>비고</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3">합계</td>
+              <td class="num">165</td>
+              <td colspan="3"></td>
+              <td class="num">245,000</td>
+              <td></td>
+              <td class="num">60,000</td>
+              <td class="num">25,000</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="note" style="margin: 16px 24px 24px;">
+        <strong>요약</strong> — R 200석 개런티 / 현재 165석 배정 / 잔여 35석 ·
+        확정 2건 (프레드 4천만 + 내부VIP) · 최종협의 2건 (불가리·피아제) · 협의 3건 · 검토중 4건
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 02. 월드컵 ============ -->
+  <section class="product">
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2 class="section-title">2026 월드컵 패키지</h2>
+      <span class="section-sub">타운보드 하이라이트 · 억 단위</span>
+    </div>
+
+    <div class="panel">
+      <div class="panel-meta">
+        <div>
+          <strong>패키지 정단가</strong> 하이라이트 170,000천원 (제안가 110,000) ·
+          정보전달 영역 50,000천원 · PV권 별도 협의
+        </div>
+        <div>
+          <strong>총 파이프라인</strong> 8.6억 ·
+          <strong>확정</strong> 1.0억
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table id="wc-table">
+          <thead>
+            <tr>
+              <th style="width:40px">#</th>
+              <th>광고주</th>
+              <th>담당자</th>
+              <th>패키지</th>
+              <th class="num">금액</th>
+              <th>상황</th>
+              <th>비고</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4">합계</td>
+              <td class="num">8.6억</td>
+              <td colspan="2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // ===== 임윤찬 카메라타 짤쯔부르크 시트 =====
+  const limData = [
+    { date: '미정', adv: '프레드',       r: 20, team: '마솔1팀', mgr: '이종석', pkg: 'CPMT(0.5) + AP(0.5)', price: 40000, status: 'confirmed',    statusLabel: '진행 확정',    show: 15000, bs: 25000, note: '' },
+    { date: '미정', adv: '불가리',       r: 25, team: '마솔1팀', mgr: '이종석', pkg: '',                    price: 25000, status: 'final-review', statusLabel: '최종 협의 중', show: 25000, bs: 0,     note: '장당 1백만원 (티켓 온리)' },
+    { date: '미정', adv: '피아제',       r: 20, team: '마솔1팀', mgr: '이종석', pkg: '',                    price: 20000, status: 'final-review', statusLabel: '최종 협의 중', show: 20000, bs: 0,     note: '장당 1백만원 (티켓 온리)' },
+    { date: '미정', adv: '그라프',       r: 0,  team: '마솔1팀', mgr: '이종석', pkg: '',                    price: 0,     status: 'review',       statusLabel: '협의 중',      show: 0,     bs: 0,     note: '' },
+    { date: '미정', adv: '셀린느',       r: 0,  team: '마솔1팀', mgr: '이종석', pkg: '',                    price: 0,     status: 'review',       statusLabel: '협의 중',      show: 0,     bs: 0,     note: '' },
+    { date: '',     adv: '발렌티노',     r: 0,  team: '마솔1팀', mgr: '이종석', pkg: '',                    price: 0,     status: 'review',       statusLabel: '협의 중',      show: 0,     bs: 0,     note: '' },
+    { date: '미정', adv: '베스트슬립',   r: 20, team: '마솔3팀', mgr: '김태헌', pkg: 'CPMT(0.5) + AP(0.5)', price: 40000, status: 'canceled',     statusLabel: '미집행',       show: 0,     bs: 0,     note: '월드컵 관련 매체 광고집행에 주력' },
+    { date: '미정', adv: '컴포즈',       r: 20, team: '마솔3팀', mgr: '김태헌', pkg: 'CPMT(0.5) + AP(0.5)', price: 40000, status: 'review',       statusLabel: '미정',         show: 0,     bs: 0,     note: '내부검토 하겠다고 함' },
+    { date: '미정', adv: '르무통',       r: 20, team: '마솔3팀', mgr: '김선용', pkg: 'CPMT(0.5) + AP(0.5)', price: 40000, status: 'review',       statusLabel: '미정',         show: 0,     bs: 0,     note: '내부검토중' },
+    { date: '미정', adv: '헥토헬스케어', r: 20, team: '마솔3팀', mgr: '김선용', pkg: 'CPMT(0.5) + AP(0.5)', price: 40000, status: 'review',       statusLabel: '미정',         show: 0,     bs: 0,     note: '내부검토중' },
+    { date: '미정', adv: '내부 VIP용',   r: 20, team: '솔기1팀', mgr: '신동민', pkg: '내부 활용',           price: 0,     status: 'internal',     statusLabel: '확정 (내부)',  show: 0,     bs: 0,     note: '' },
+  ];
+
+  // ===== 월드컵 데이터 (억) =====
+  const wcData = [
+    { adv: '체육진흥공단',    mgr: '-',     pkg: '타운보드',                              amt: 0.5, status: 'review',   note: '제안서 전달, 검토중' },
+    { adv: '베스트슬립',      mgr: '김태헌', pkg: '타운보드 하이라이트 + 정보전달영역',    amt: 1.0, status: 'review',   note: '검토중' },
+    { adv: '굽네치킨',        mgr: '김태헌', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'review',   note: '검토중' },
+    { adv: '도미노피자',      mgr: '김태헌', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'canceled', note: '예산부족 (지역광고 우선)' },
+    { adv: '르무통',          mgr: '김선용', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'review',   note: '검토중' },
+    { adv: '헥토헬스케어',    mgr: '김선용', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'review',   note: '검토중' },
+    { adv: '한국스포츠레저',  mgr: '김선용', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'review',   note: '검토중' },
+    { adv: '벨롭(GTS글로벌)', mgr: '김선용', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'review',   note: '관심은 있으나 예산부족' },
+    { adv: '시다스',          mgr: '김선용', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'review',   note: '검토중' },
+    { adv: '바크(BARC)',      mgr: '김선용', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'review',   note: '검토중' },
+    { adv: 'SKT',             mgr: '강승한', pkg: '타운보드 하이라이트',                   amt: 1.1, status: 'review',   note: '예산부족으로 부정적' },
+    { adv: '넥슨',            mgr: '김언섭', pkg: '타운보드 하이라이트',                   amt: 1.0, status: 'confirmed', note: '확정' },
+    { adv: '틱톡',            mgr: '김언섭', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'review',   note: '검토중' },
+    { adv: '닌텐도',          mgr: '김언섭', pkg: '타운보드 하이라이트',                   amt: 0.5, status: 'review',   note: '검토중' },
+  ];
+
+  const fmt = n => n.toLocaleString('ko-KR');
+  const wcStatusLabel = {
+    confirmed: { label: '확정',   cls: 'confirmed' },
+    review:    { label: '검토중', cls: 'review'    },
+    canceled:  { label: '미집행', cls: 'canceled'  },
+  };
+
+  // 임윤찬 테이블
+  const limBody = document.querySelector('#lim-table tbody');
+  limData.forEach((d, i) => {
+    const tr = document.createElement('tr');
+    if (d.status === 'internal') tr.classList.add('internal');
+    tr.innerHTML = `
+      <td style="color:var(--text-mute)">${i + 1}</td>
+      <td>${d.date || '-'}</td>
+      <td class="advertiser">${d.adv}</td>
+      <td class="num ${d.r ? '' : 'empty'}">${d.r || '-'}</td>
+      <td class="team">${d.team}</td>
+      <td>${d.mgr}</td>
+      <td class="package">${d.pkg || '-'}</td>
+      <td class="num ${d.price ? '' : 'empty'}">${d.price ? fmt(d.price) : '-'}</td>
+      <td><span class="badge ${d.status}">${d.statusLabel}</span></td>
+      <td class="num ${d.show ? '' : 'empty'}">${d.show ? fmt(d.show) : '-'}</td>
+      <td class="num ${d.bs ? '' : 'empty'}">${d.bs ? fmt(d.bs) : '-'}</td>
+      <td style="color:var(--text-mute);font-size:12px">${d.note}</td>
+    `;
+    limBody.appendChild(tr);
+  });
+
+  // 월드컵 테이블
+  const wcBody = document.querySelector('#wc-table tbody');
+  wcData.forEach((d, i) => {
+    const sl = wcStatusLabel[d.status];
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--text-mute)">${i + 1}</td>
+      <td class="advertiser">${d.adv}</td>
+      <td>${d.mgr}</td>
+      <td class="package">${d.pkg}</td>
+      <td class="num">${d.amt}억</td>
+      <td><span class="badge ${sl.cls}">${sl.label}</span></td>
+      <td style="color:var(--text-mute);font-size:12px">${d.note}</td>
+    `;
+    wcBody.appendChild(tr);
+  });
+</script>
+</body>
+</html>
