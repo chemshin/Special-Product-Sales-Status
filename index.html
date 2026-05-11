@@ -633,7 +633,7 @@
     </div>
 
     <div class="summary-card leaders">
-      <div class="summary-title">중앙리더스클럽</div>
+      <div class="summary-title">중앙멤버스클럽</div>
       <div class="summary-stats" id="leaders-summary">
         <div class="stat"><span class="stat-label">제안</span><span class="stat-value">-</span></div>
         <div class="stat confirmed"><span class="stat-label">확정</span><span class="stat-value">-</span></div>
@@ -718,7 +718,7 @@
   <section class="product">
     <div class="section-head">
       <span class="section-num">03</span>
-      <h2 class="section-title">중앙리더스클럽</h2>
+      <h2 class="section-title">중앙멤버스클럽</h2>
       <span class="section-sub">마솔국 / 콘사팀 제안 현황 · 천원 단위</span>
     </div>
 
@@ -811,9 +811,15 @@
 
     // 요약 카드
     const total = lim.items.length;
-    const confirmed = lim.items.filter(d => statusBucket(d.statusLabel) === 'confirmed');
-    const pending   = lim.items.filter(d => statusBucket(d.statusLabel) === 'pending');
-    const confirmedAmt = confirmed.reduce((s, d) => s + (Number(d.price) || 0), 0);
+    // GAS에서 계산한 확정 기준 사용
+    const confirmedItems = lim.items.filter(d => {
+      const s = String(d.statusLabel || '').trim();
+      return s === '확정' || s === '진행 확정' || s.startsWith('계산서');
+    });
+    const pendingItems = lim.items.filter(d => {
+      const s = String(d.statusLabel || '').trim();
+      return !(s === '확정' || s === '진행 확정' || s.startsWith('계산서'));
+    });
 
     document.getElementById('lim-summary').innerHTML = `
       <div class="stat">
@@ -822,11 +828,11 @@
       </div>
       <div class="stat confirmed">
         <span class="stat-label">확정</span>
-        <span class="stat-value">${confirmed.length}<span class="unit">건</span><span class="amount">${(confirmedAmt/100000).toFixed(2)}억</span></span>
+        <span class="stat-value">${confirmedItems.length}<span class="unit">건</span><span class="amount">${(lim.confirmedPrice/100000).toFixed(2)}억</span></span>
       </div>
       <div class="stat review">
         <span class="stat-label">제안중</span>
-        <span class="stat-value">${pending.length}<span class="unit">건</span></span>
+        <span class="stat-value">${pendingItems.length}<span class="unit">건</span></span>
       </div>
     `;
 
@@ -837,17 +843,18 @@
         <span class="pill"><span class="key">개런티 금액</span> ${fmt(lim.guaranteeAmount)}</span>
       </div>
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <span class="pill"><span class="key">확정 매수</span> ${lim.totals.r}석</span>
-        <span class="pill"><span class="key">잔여</span> ${lim.guarantee - lim.totals.r}석</span>
+        <span class="pill"><span class="key">확정 매수</span> ${lim.confirmedR}석</span>
+        <span class="pill"><span class="key">제안중</span> ${lim.pendingR}석</span>
+        <span class="pill"><span class="key">잔여</span> ${lim.remain}석</span>
       </div>
     `;
 
-    // 좌석 진행률
-    const pct = lim.guarantee > 0 ? (lim.totals.r / lim.guarantee * 100) : 0;
+    // 좌석 진행률 (확정 기준)
+    const pct = lim.guarantee > 0 ? (lim.confirmedR / lim.guarantee * 100) : 0;
     document.getElementById('lim-seat').innerHTML = `
       <div class="seat-row">
         <span class="seat-label">R석 확정 진행률</span>
-        <span class="seat-value">${lim.totals.r} <span class="target">/ ${lim.guarantee}석 (개런티)</span></span>
+        <span class="seat-value">${lim.confirmedR} <span class="target">/ ${lim.guarantee}석 (개런티)</span></span>
       </div>
       <div class="seat-bar">
         <div class="seat-fill" style="width: ${Math.min(pct, 100)}%"></div>
