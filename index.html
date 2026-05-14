@@ -747,12 +747,27 @@
   function statusClass(label) {
     if (!label) return 'unknown';
     const s = String(label).trim();
-    if (s === '확정' || s === '진행 확정' || s === '계산서 발행' || s.startsWith('계산서')) return 'confirmed';
-    if (s === '확정 (내부)' || s.includes('내부')) return 'internal';
+
+    // '검토' 키워드가 들어간 텍스트는 어떤 단어와 조합되든 무조건 review (우선)
+    if (s.includes('검토')) return 'review';
+
+    // 확정류
+    if (s === '확정' || s === '진행 확정' || s.startsWith('계산서')) return 'confirmed';
+
+    // 내부 활용 (임윤찬 내부 VIP용 같은 정확한 케이스만)
+    if (s === '확정 (내부)' || s === '내부 활용' || s === '내부 VIP용') return 'internal';
+
+    // 최종 협의
     if (s === '최종 협의 중' || s === '최종협의중') return 'final-review';
+
+    // 미집행류
     if (s === '미집행' || s === '취소' || s === '드랍') return 'canceled';
-    if (s === '협의 중' || s === '협의중' || s === '미정' || s === '검토중' || s.includes('검토')) return 'review';
-    return 'unknown';
+
+    // 협의/미정
+    if (s === '협의 중' || s === '협의중' || s === '미정') return 'review';
+
+    // 그 외 분류되지 않은 모든 텍스트는 review로 처리 (요약 카운트 안전성 확보)
+    return 'review';
   }
 
   // 상황 → 카테고리 (요약 카운트용)
@@ -862,10 +877,18 @@
       <div class="seat-pct">${pct.toFixed(1)}%</div>
     `;
 
-    // 테이블
+    // 테이블 (확정건이 위로 오도록 정렬)
     const tbody = document.querySelector('#lim-table tbody');
     tbody.innerHTML = '';
-    lim.items.forEach((d, i) => {
+    const isLimConfirmed = (d) => {
+      const cls = statusClass(d.statusLabel);
+      return cls === 'confirmed' || cls === 'internal';
+    };
+    const limSorted = [
+      ...lim.items.filter(isLimConfirmed),
+      ...lim.items.filter(d => !isLimConfirmed(d))
+    ];
+    limSorted.forEach((d, i) => {
       const cls = statusClass(d.statusLabel);
       const tr = document.createElement('tr');
       if (cls === 'internal') tr.classList.add('internal');
@@ -931,7 +954,15 @@
 
     const tbody = document.querySelector('#wc-table tbody');
     tbody.innerHTML = '';
-    items.forEach((d, i) => {
+    const isWcConfirmed = (d) => {
+      const cls = statusClass(d.statusLabel);
+      return cls === 'confirmed' || cls === 'internal';
+    };
+    const wcSorted = [
+      ...items.filter(isWcConfirmed),
+      ...items.filter(d => !isWcConfirmed(d))
+    ];
+    wcSorted.forEach((d, i) => {
       const cls = statusClass(d.statusLabel);
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -958,13 +989,22 @@
   // ===== 중앙리더스클럽 렌더 =====
   function renderLeaders(leaders) {
     if (!leaders) return;
-    const items = leaders.items;
+    const items = leaders.items || [];
+
+    // 확정 여부를 엄격히 판정 (statusClass 결과가 'confirmed' 또는 'internal'인 경우만)
+    const isConfirmed = (d) => {
+      const cls = statusClass(d.statusLabel);
+      return cls === 'confirmed' || cls === 'internal';
+    };
 
     const total = items.length;
-    const confirmed = items.filter(d => statusBucket(d.statusLabel) === 'confirmed');
-    const pending   = items.filter(d => statusBucket(d.statusLabel) === 'pending');
+    const confirmed = items.filter(isConfirmed);
+    const pending   = items.filter(d => !isConfirmed(d));
     const confirmedAmt = confirmed.reduce((s, d) => s + (Number(d.price) || 0), 0);
     const totalAmt = items.reduce((s, d) => s + (Number(d.price) || 0), 0);
+
+    // 확정 건이 위로 오도록 정렬 (확정 → 비확정), 원본 순서 유지
+    const sorted = [...confirmed, ...pending];
 
     document.getElementById('leaders-summary').innerHTML = `
       <div class="stat">
@@ -1027,7 +1067,7 @@
     `;
 
     const tbody = container.querySelector('tbody');
-    items.forEach((d, i) => {
+    sorted.forEach((d, i) => {
       const cls = statusClass(d.statusLabel);
       const tr = document.createElement('tr');
       tr.innerHTML = `
