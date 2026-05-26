@@ -194,7 +194,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    min-width: 100px;
+    min-width: 84px;
   }
 
   .stat-label {
@@ -229,7 +229,85 @@
   }
 
   .stat.confirmed .stat-value { color: var(--green); }
+  .stat.likely .stat-value { color: #5a9d76; }
   .stat.review .stat-value { color: var(--amber); }
+  .stat.shortfall .stat-value { color: var(--red); }
+  .stat.dropped .stat-value { color: #9a9488; }
+
+  /* 그룹 구분선 - 다음 stat들을 새 줄로 밀어냄 */
+  .stat-divider {
+    flex-basis: 100%;
+    height: 1px;
+    background: var(--border-soft);
+    margin: 6px 0 2px;
+  }
+
+  /* 멤버스클럽 요약 매트릭스 표 */
+  .summary-stats.has-matrix {
+    display: block;
+  }
+
+  .matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .matrix-table thead th {
+    padding: 6px 12px;
+    text-align: right;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .matrix-table thead th:first-child {
+    text-align: left;
+  }
+
+  .matrix-table thead th.c-confirmed { color: var(--green); }
+  .matrix-table thead th.c-likely { color: #5a9d76; }
+  .matrix-table thead th.c-proposed { color: var(--amber); }
+  .matrix-table thead th.c-dropped { color: #9a9488; }
+
+  .matrix-table tbody th {
+    padding: 9px 12px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text);
+    font-size: 13px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .matrix-table tbody tr:last-child th,
+  .matrix-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .matrix-table tbody tr.mx-total th,
+  .matrix-table tbody tr.mx-total td {
+    background: var(--bg-soft);
+  }
+
+  .matrix-table td.mx-num {
+    padding: 9px 12px;
+    text-align: right;
+    font-family: 'IBM Plex Sans KR', sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text-soft);
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .matrix-table td.mx-num.strong { color: var(--text); font-weight: 700; }
+  .matrix-table td.mx-num.c-confirmed { color: var(--green); }
+  .matrix-table td.mx-num.c-likely { color: #5a9d76; }
+  .matrix-table td.mx-num.c-proposed { color: var(--amber); }
+  .matrix-table td.mx-num.c-dropped { color: #9a9488; }
 
   section.product {
     margin-bottom: 56px;
@@ -313,6 +391,22 @@
   .panel-meta .pill .key {
     color: var(--text-mute);
   }
+
+  /* 부족분 - 빨간색 강조 */
+  .panel-meta .pill.shortfall {
+    background: var(--red-soft);
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .panel-meta .pill.shortfall .key { color: var(--red); opacity: 0.7; }
+
+  /* 초과 달성 - 그린 */
+  .panel-meta .pill.achieved {
+    background: var(--green-soft);
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .panel-meta .pill.achieved .key { color: var(--green); opacity: 0.7; }
 
   .table-scroll { overflow-x: auto; }
 
@@ -422,6 +516,14 @@
   .badge.confirmed { background: var(--green-soft); color: var(--green); }
   .badge.confirmed::before { background: var(--green); }
 
+  /* 유력 - 옅은 그린 (확정에 가까운 느낌) */
+  .badge.likely { background: rgba(61, 138, 90, 0.08); color: #5a9d76; }
+  .badge.likely::before { background: #5a9d76; }
+
+  /* 제안 - 베이지/뉴트럴 */
+  .badge.proposed { background: var(--bg-soft); color: var(--text-soft); border: 1px solid var(--border); }
+  .badge.proposed::before { background: var(--text-mute); }
+
   .badge.final-review { background: var(--blue-soft); color: var(--blue); }
   .badge.final-review::before { background: var(--blue); }
 
@@ -430,6 +532,10 @@
 
   .badge.canceled { background: var(--red-soft); color: var(--red); }
   .badge.canceled::before { background: var(--red); }
+
+  /* 드롭/불가 - 회색 (탈락) */
+  .badge.dropped { background: #f0eeea; color: #9a9488; text-decoration: line-through; text-decoration-thickness: 1px; }
+  .badge.dropped::before { background: #b5afa3; }
 
   .badge.internal { background: var(--purple-soft); color: var(--purple); }
   .badge.internal::before { background: var(--purple); }
@@ -634,10 +740,8 @@
 
     <div class="summary-card leaders">
       <div class="summary-title">중앙멤버스클럽</div>
-      <div class="summary-stats" id="leaders-summary">
+      <div class="summary-stats has-matrix" id="leaders-summary">
         <div class="stat"><span class="stat-label">제안</span><span class="stat-value">-</span></div>
-        <div class="stat confirmed"><span class="stat-label">확정</span><span class="stat-value">-</span></div>
-        <div class="stat review"><span class="stat-label">제안중</span><span class="stat-value">-</span></div>
       </div>
     </div>
   </div>
@@ -748,25 +852,29 @@
     if (!label) return 'unknown';
     const s = String(label).trim();
 
-    // '검토' 키워드가 들어간 텍스트는 어떤 단어와 조합되든 무조건 review (우선)
+    // 정확한 단어 매칭 우선
+    if (s === '확정' || s === '진행 확정' || s.startsWith('계산서')) return 'confirmed';
+    if (s === '유력') return 'likely';
+    if (s === '제안') return 'proposed';
+    if (s === '검토' || s === '검토중') return 'review';
+    if (s === '드롭' || s === '드랍' || s === '불가' || s === '미집행' || s === '취소') return 'dropped';
+
+    // '검토' 키워드가 들어간 긴 텍스트 (예: '제안서 전달 및 검토 중')
     if (s.includes('검토')) return 'review';
 
-    // 확정류
-    if (s === '확정' || s === '진행 확정' || s.startsWith('계산서')) return 'confirmed';
-
-    // 내부 활용 (임윤찬 내부 VIP용 같은 정확한 케이스만)
+    // 내부 활용 (임윤찬 내부 VIP용)
     if (s === '확정 (내부)' || s === '내부 활용' || s === '내부 VIP용') return 'internal';
 
     // 최종 협의
     if (s === '최종 협의 중' || s === '최종협의중') return 'final-review';
 
-    // 미집행류
+    // 미집행/취소
     if (s === '미집행' || s === '취소' || s === '드랍') return 'canceled';
 
-    // 협의/미정
+    // 협의 (오래된 임윤찬 상태값)
     if (s === '협의 중' || s === '협의중' || s === '미정') return 'review';
 
-    // 그 외 분류되지 않은 모든 텍스트는 review로 처리 (요약 카운트 안전성 확보)
+    // 그 외 분류되지 않은 텍스트는 review로 (안전)
     return 'review';
   }
 
@@ -836,6 +944,11 @@
       return !(s === '확정' || s === '진행 확정' || s.startsWith('계산서'));
     });
 
+    // 확정 매출 = J열(공연 매출) 합계 = J44
+    const confirmedRevenue = lim.totals.show;
+    // 부족분 계산 (개런티 금액 - 확정 매출)
+    const shortfall = lim.guaranteeAmount - confirmedRevenue;
+
     document.getElementById('lim-summary').innerHTML = `
       <div class="stat">
         <span class="stat-label">제안</span>
@@ -843,11 +956,15 @@
       </div>
       <div class="stat confirmed">
         <span class="stat-label">확정</span>
-        <span class="stat-value">${confirmedItems.length}<span class="unit">건</span><span class="amount">${(lim.confirmedPrice/100000).toFixed(2)}억</span></span>
+        <span class="stat-value">${confirmedItems.length}<span class="unit">건</span><span class="amount">${(confirmedRevenue/100000).toFixed(2)}억</span></span>
       </div>
       <div class="stat review">
         <span class="stat-label">제안중</span>
         <span class="stat-value">${pendingItems.length}<span class="unit">건</span></span>
+      </div>
+      <div class="stat shortfall">
+        <span class="stat-label">${shortfall > 0 ? '부족분' : '초과 달성'}</span>
+        <span class="stat-value">${(Math.abs(shortfall)/100000).toFixed(2)}<span class="unit">억</span></span>
       </div>
     `;
 
@@ -856,6 +973,7 @@
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
         <span class="pill"><span class="key">개런티</span> R ${lim.guarantee}석</span>
         <span class="pill"><span class="key">개런티 금액</span> ${fmt(lim.guaranteeAmount)}</span>
+        <span class="pill"><span class="key">확정 매출</span> ${fmt(confirmedRevenue)}</span>
       </div>
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
         <span class="pill"><span class="key">확정 매수</span> ${lim.confirmedR}석</span>
@@ -991,38 +1109,82 @@
     if (!leaders) return;
     const items = leaders.items || [];
 
-    // 확정 여부를 엄격히 판정 (statusClass 결과가 'confirmed' 또는 'internal'인 경우만)
-    const isConfirmed = (d) => {
-      const cls = statusClass(d.statusLabel);
-      return cls === 'confirmed' || cls === 'internal';
-    };
+    // 4단계 분류
+    const clsOf = (d) => statusClass(d.statusLabel);
+    const isConfirmed = (d) => { const c = clsOf(d); return c === 'confirmed' || c === 'internal'; };
+    const isLikely    = (d) => clsOf(d) === 'likely';
+    const isDropped   = (d) => clsOf(d) === 'dropped' || clsOf(d) === 'canceled';
+    const isProposed  = (d) => { const c = clsOf(d); return c === 'proposed' || c === 'review' || c === 'final-review'; };
 
-    const total = items.length;
+    const total     = items.length;
     const confirmed = items.filter(isConfirmed);
-    const pending   = items.filter(d => !isConfirmed(d));
+    const likely    = items.filter(isLikely);
+    const proposed  = items.filter(isProposed);
+    const dropped   = items.filter(isDropped);
+
     const confirmedAmt = confirmed.reduce((s, d) => s + (Number(d.price) || 0), 0);
-    const totalAmt = items.reduce((s, d) => s + (Number(d.price) || 0), 0);
+    const likelyAmt    = likely.reduce((s, d) => s + (Number(d.price) || 0), 0);
+    const totalAmt     = items.reduce((s, d) => s + (Number(d.price) || 0), 0);
 
-    // 확정 건이 위로 오도록 정렬 (확정 → 비확정), 원본 순서 유지
-    const sorted = [...confirmed, ...pending];
+    // 그룹별 (마솔국 / 콘사국) - 드롭 제외한 유효 건수
+    const groupOf = (d) => {
+      const g = String(d.group || '').trim();
+      if (g.indexOf('마솔') !== -1) return '마솔국';
+      if (g.indexOf('콘사') !== -1) return '콘사국';
+      return '기타';
+    };
+    const masol = items.filter(d => groupOf(d) === '마솔국');
+    const consa = items.filter(d => groupOf(d) === '콘사국');
 
+    // 정렬: 확정 → 유력 → 제안 → 드롭 순
+    const sorted = [...confirmed, ...likely, ...proposed, ...dropped,
+                    ...items.filter(d => !isConfirmed(d) && !isLikely(d) && !isProposed(d) && !isDropped(d))];
+
+    // 국별 x 상태별 집계 함수
+    const countBy = (arr, pred) => arr.filter(pred).length;
+    const buildRow = (arr) => ({
+      total: arr.length,
+      confirmed: countBy(arr, isConfirmed),
+      likely: countBy(arr, isLikely),
+      proposed: countBy(arr, isProposed),
+      dropped: countBy(arr, isDropped)
+    });
+    const rowAll   = buildRow(items);
+    const rowMasol = buildRow(masol);
+    const rowConsa = buildRow(consa);
+
+    const cell = (v, cls) => `<td class="mx-num ${cls || ''}">${v}</td>`;
     document.getElementById('leaders-summary').innerHTML = `
-      <div class="stat">
-        <span class="stat-label">제안</span>
-        <span class="stat-value">${total}<span class="unit">건</span></span>
-      </div>
-      <div class="stat confirmed">
-        <span class="stat-label">확정</span>
-        <span class="stat-value">${confirmed.length}<span class="unit">건</span><span class="amount">${(confirmedAmt/100000).toFixed(2)}억</span></span>
-      </div>
-      <div class="stat review">
-        <span class="stat-label">제안중</span>
-        <span class="stat-value">${pending.length}<span class="unit">건</span></span>
-      </div>
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>전체</th>
+            <th class="c-confirmed">확정</th>
+            <th class="c-likely">유력</th>
+            <th class="c-proposed">제안</th>
+            <th class="c-dropped">드롭</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="mx-total">
+            <th>전체</th>
+            ${cell(rowAll.total,'strong')}${cell(rowAll.confirmed,'c-confirmed')}${cell(rowAll.likely,'c-likely')}${cell(rowAll.proposed,'c-proposed')}${cell(rowAll.dropped,'c-dropped')}
+          </tr>
+          <tr>
+            <th>마솔국</th>
+            ${cell(rowMasol.total,'strong')}${cell(rowMasol.confirmed,'c-confirmed')}${cell(rowMasol.likely,'c-likely')}${cell(rowMasol.proposed,'c-proposed')}${cell(rowMasol.dropped,'c-dropped')}
+          </tr>
+          <tr>
+            <th>콘사국</th>
+            ${cell(rowConsa.total,'strong')}${cell(rowConsa.confirmed,'c-confirmed')}${cell(rowConsa.likely,'c-likely')}${cell(rowConsa.proposed,'c-proposed')}${cell(rowConsa.dropped,'c-dropped')}
+          </tr>
+        </tbody>
+      </table>
     `;
 
     document.getElementById('leaders-pipeline').innerHTML = total > 0
-      ? `<strong>총 ${total}건</strong> · ${fmt(totalAmt)}천원`
+      ? `<strong>총 ${total}건</strong> · 확정 ${(confirmedAmt/100000).toFixed(2)}억 · 유력 ${(likelyAmt/100000).toFixed(2)}억`
       : `<strong>제안 0건</strong> · 데이터 입력 대기`;
 
     const container = document.getElementById('leaders-content');
@@ -1045,7 +1207,7 @@
             <tr>
               <th style="width:40px">#</th>
               <th>현황</th>
-              <th>매출시점</th>
+              <th>구분</th>
               <th>광고주</th>
               <th>대행사</th>
               <th>담당자</th>
@@ -1069,11 +1231,13 @@
     const tbody = container.querySelector('tbody');
     sorted.forEach((d, i) => {
       const cls = statusClass(d.statusLabel);
+      // 시트의 '제안' 상태값은 화면에 '제안중'으로 표기
+      const displayLabel = (d.statusLabel === '제안') ? '제안중' : (d.statusLabel || '-');
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td style="color:var(--text-mute)">${i + 1}</td>
-        <td><span class="badge ${cls}">${d.statusLabel || '-'}</span></td>
-        <td>${d.date || '-'}</td>
+        <td><span class="badge ${cls}">${displayLabel}</span></td>
+        <td class="team">${d.group || '-'}</td>
         <td class="advertiser">${d.adv}</td>
         <td>${d.agency || '-'}</td>
         <td>${d.mgr || '-'}</td>
