@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>5월 주요 상품 판매 현황 | 비솔본부</title>
+<title>중앙멤버스클럽 판매 현황 | 비솔본부</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -151,7 +151,7 @@
 
   .summary {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr;
     gap: 16px;
     margin-bottom: 48px;
   }
@@ -243,6 +243,18 @@
   }
 
   /* 멤버스클럽 요약 매트릭스 표 */
+  /* 멤버스 테이블 - 한 줄 고정, 좁은 컬럼 줄바꿈 방지 */
+  #leaders-table.leaders-fixed { table-layout: fixed; }
+  #leaders-table.leaders-fixed td,
+  #leaders-table.leaders-fixed th {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* 광고주는 좀 길어도 표시 (줄바꿈은 막되 잘리면 ellipsis) */
+  #leaders-table.leaders-fixed td.advertiser { white-space: nowrap; }
+
+  /* 매트릭스 표 */
   .summary-stats.has-matrix {
     display: block;
   }
@@ -433,10 +445,11 @@
 
   tbody tr {
     border-bottom: 1px solid var(--border-soft);
-    transition: background 0.15s ease;
   }
 
-  tbody tr:hover { background: var(--bg-elevated); }
+  tbody tr:hover {
+    background: var(--bg-elevated);
+  }
   tbody tr:last-child { border-bottom: none; }
 
   tbody tr.internal { background: #faf6f8; }
@@ -634,12 +647,10 @@
     align-items: center;
     justify-content: center;
     z-index: 999;
-    transition: opacity 0.3s;
   }
 
   .loading-overlay.hidden {
-    opacity: 0;
-    pointer-events: none;
+    display: none;
   }
 
   .loading-spinner {
@@ -706,10 +717,10 @@
   <header>
     <div>
       <div class="brand-mark">JoongAng Ilbo · 비즈솔루션본부</div>
-      <h1>5월 주요 상품 <em>판매 현황</em></h1>
+      <h1>중앙멤버스클럽 <em>판매 현황</em></h1>
     </div>
     <div class="meta">
-      <strong>2026 Q2</strong><br>
+      <strong>2026. 6</strong><br>
       <span id="updated-at">로딩 중...</span><br>
       <button class="refresh-btn" id="refresh-btn" onclick="loadData()">새로고침</button>
     </div>
@@ -719,111 +730,18 @@
 
   <!-- ============ 상단 요약 ============ -->
   <div class="summary">
-
-    <div class="summary-card">
-      <div class="summary-title">임윤찬 티켓 패키지</div>
-      <div class="summary-stats" id="lim-summary">
-        <div class="stat"><span class="stat-label">제안</span><span class="stat-value">-</span></div>
-        <div class="stat confirmed"><span class="stat-label">확정</span><span class="stat-value">-</span></div>
-        <div class="stat review"><span class="stat-label">제안중</span><span class="stat-value">-</span></div>
-      </div>
-    </div>
-
-    <div class="summary-card wc">
-      <div class="summary-title">2026 월드컵 패키지</div>
-      <div class="summary-stats" id="wc-summary">
-        <div class="stat"><span class="stat-label">제안</span><span class="stat-value">-</span></div>
-        <div class="stat confirmed"><span class="stat-label">확정</span><span class="stat-value">-</span></div>
-        <div class="stat review"><span class="stat-label">제안중</span><span class="stat-value">-</span></div>
-      </div>
-    </div>
-
     <div class="summary-card leaders">
-      <div class="summary-title">중앙멤버스클럽</div>
       <div class="summary-stats has-matrix" id="leaders-summary">
-        <div class="stat"><span class="stat-label">제안</span><span class="stat-value">-</span></div>
+        <div class="stat"><span class="stat-label">전체</span><span class="stat-value">-</span></div>
       </div>
     </div>
   </div>
 
-  <!-- ============ 01. 임윤찬 ============ -->
+  <!-- ============ 중앙멤버스클럽 ============ -->
   <section class="product">
     <div class="section-head">
-      <span class="section-num">01</span>
-      <h2 class="section-title">임윤찬 카메라타 — 짤쯔부르크</h2>
-      <span class="section-sub">티켓 판매 현황 및 전망 · 천원 단위</span>
-    </div>
-
-    <div class="panel">
-      <div class="panel-meta" id="lim-meta"></div>
-      <div class="seat-block" id="lim-seat"></div>
-      <div class="table-scroll">
-        <table id="lim-table">
-          <thead>
-            <tr>
-              <th style="width:40px">#</th>
-              <th>상황</th>
-              <th>매출시점</th>
-              <th>광고주</th>
-              <th class="num">R석</th>
-              <th>담당팀</th>
-              <th>담당자</th>
-              <th>패키지</th>
-              <th class="num">금액</th>
-              <th class="num">공연매출</th>
-              <th class="num">비솔매출</th>
-              <th>비고</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-          <tfoot></tfoot>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 02. 월드컵 ============ -->
-  <section class="product">
-    <div class="section-head">
-      <span class="section-num">02</span>
-      <h2 class="section-title">2026 월드컵 패키지</h2>
-      <span class="section-sub">타운보드 하이라이트 · 억 단위</span>
-    </div>
-
-    <div class="panel">
-      <div class="panel-meta">
-        <div>
-          <strong>패키지 정단가</strong> 하이라이트 170,000천원 (제안가 110,000) ·
-          정보전달 영역 50,000천원 · PV권 별도 협의
-        </div>
-        <div id="wc-pipeline"></div>
-      </div>
-      <div class="table-scroll">
-        <table id="wc-table">
-          <thead>
-            <tr>
-              <th style="width:40px">#</th>
-              <th>상황</th>
-              <th>광고주</th>
-              <th>담당자</th>
-              <th>패키지</th>
-              <th class="num">금액</th>
-              <th>비고</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-          <tfoot></tfoot>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 03. 중앙리더스클럽 ============ -->
-  <section class="product">
-    <div class="section-head">
-      <span class="section-num">03</span>
       <h2 class="section-title">중앙멤버스클럽</h2>
-      <span class="section-sub">마솔국 / 콘사팀 제안 현황 · 천원 단위</span>
+      <span class="section-sub">확정 · 유력 광고주 목록 · 천원 단위</span>
     </div>
 
     <div class="panel">
@@ -905,8 +823,6 @@
 
       if (data.error) throw new Error(data.error);
 
-      renderLim(data.lim);
-      renderWc(data.wc);
       renderLeaders(data.leaders);
 
       // updated 시각
@@ -926,182 +842,6 @@
   function showError(msg) {
     document.getElementById('error-container').innerHTML =
       `<div class="error-banner"><strong>오류</strong> · ${msg}</div>`;
-  }
-
-  // ===== 임윤찬 렌더 =====
-  function renderLim(lim) {
-    if (!lim) return;
-
-    // 요약 카드
-    const total = lim.items.length;
-    // GAS에서 계산한 확정 기준 사용
-    const confirmedItems = lim.items.filter(d => {
-      const s = String(d.statusLabel || '').trim();
-      return s === '확정' || s === '진행 확정' || s.startsWith('계산서');
-    });
-    const pendingItems = lim.items.filter(d => {
-      const s = String(d.statusLabel || '').trim();
-      return !(s === '확정' || s === '진행 확정' || s.startsWith('계산서'));
-    });
-
-    // 확정 매출 = J열(공연 매출) 합계 = J44
-    const confirmedRevenue = lim.totals.show;
-    // 부족분 계산 (개런티 금액 - 확정 매출)
-    const shortfall = lim.guaranteeAmount - confirmedRevenue;
-
-    document.getElementById('lim-summary').innerHTML = `
-      <div class="stat">
-        <span class="stat-label">제안</span>
-        <span class="stat-value">${total}<span class="unit">건</span></span>
-      </div>
-      <div class="stat confirmed">
-        <span class="stat-label">확정</span>
-        <span class="stat-value">${confirmedItems.length}<span class="unit">건</span><span class="amount">${(confirmedRevenue/100000).toFixed(2)}억</span></span>
-      </div>
-      <div class="stat review">
-        <span class="stat-label">제안중</span>
-        <span class="stat-value">${pendingItems.length}<span class="unit">건</span></span>
-      </div>
-      <div class="stat shortfall">
-        <span class="stat-label">${shortfall > 0 ? '부족분' : '초과 달성'}</span>
-        <span class="stat-value">${(Math.abs(shortfall)/100000).toFixed(2)}<span class="unit">억</span></span>
-      </div>
-    `;
-
-    // 패널 메타 (개런티/잔여)
-    document.getElementById('lim-meta').innerHTML = `
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <span class="pill"><span class="key">개런티</span> R ${lim.guarantee}석</span>
-        <span class="pill"><span class="key">개런티 금액</span> ${fmt(lim.guaranteeAmount)}</span>
-        <span class="pill"><span class="key">확정 매출</span> ${fmt(confirmedRevenue)}</span>
-      </div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <span class="pill"><span class="key">확정 매수</span> ${lim.confirmedR}석</span>
-        <span class="pill"><span class="key">제안중</span> ${lim.pendingR}석</span>
-        <span class="pill"><span class="key">잔여</span> ${lim.remain}석</span>
-      </div>
-    `;
-
-    // 좌석 진행률 (확정 기준)
-    const pct = lim.guarantee > 0 ? (lim.confirmedR / lim.guarantee * 100) : 0;
-    document.getElementById('lim-seat').innerHTML = `
-      <div class="seat-row">
-        <span class="seat-label">R석 확정 진행률</span>
-        <span class="seat-value">${lim.confirmedR} <span class="target">/ ${lim.guarantee}석 (개런티)</span></span>
-      </div>
-      <div class="seat-bar">
-        <div class="seat-fill" style="width: ${Math.min(pct, 100)}%"></div>
-      </div>
-      <div class="seat-pct">${pct.toFixed(1)}%</div>
-    `;
-
-    // 테이블 (확정건이 위로 오도록 정렬)
-    const tbody = document.querySelector('#lim-table tbody');
-    tbody.innerHTML = '';
-    const isLimConfirmed = (d) => {
-      const cls = statusClass(d.statusLabel);
-      return cls === 'confirmed' || cls === 'internal';
-    };
-    const limSorted = [
-      ...lim.items.filter(isLimConfirmed),
-      ...lim.items.filter(d => !isLimConfirmed(d))
-    ];
-    limSorted.forEach((d, i) => {
-      const cls = statusClass(d.statusLabel);
-      const tr = document.createElement('tr');
-      if (cls === 'internal') tr.classList.add('internal');
-      tr.innerHTML = `
-        <td style="color:var(--text-mute)">${i + 1}</td>
-        <td><span class="badge ${cls}">${d.statusLabel || '-'}</span></td>
-        <td>${d.date || '-'}</td>
-        <td class="advertiser">${d.adv}</td>
-        <td class="num ${d.r ? '' : 'empty'}">${d.r || '-'}</td>
-        <td class="team">${d.team || '-'}</td>
-        <td>${d.mgr || '-'}</td>
-        <td class="package">${d.pkg || '-'}</td>
-        <td class="num ${d.price ? '' : 'empty'}">${d.price ? fmt(d.price) : '-'}</td>
-        <td class="num ${d.show ? '' : 'empty'}">${d.show ? fmt(d.show) : '-'}</td>
-        <td class="num ${d.bs ? '' : 'empty'}">${d.bs ? fmt(d.bs) : '-'}</td>
-        <td style="color:var(--text-mute);font-size:12px">${d.note || ''}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-    // tfoot 합계
-    document.querySelector('#lim-table tfoot').innerHTML = `
-      <tr>
-        <td colspan="4">합계</td>
-        <td class="num">${fmt(lim.totals.r)}</td>
-        <td colspan="3"></td>
-        <td class="num">${fmt(lim.totals.price)}</td>
-        <td class="num">${fmt(lim.totals.show)}</td>
-        <td class="num">${fmt(lim.totals.bs)}</td>
-        <td></td>
-      </tr>
-    `;
-  }
-
-  // ===== 월드컵 렌더 =====
-  function renderWc(wc) {
-    if (!wc) return;
-    const items = wc.items;
-
-    const total = items.length;
-    const confirmed = items.filter(d => statusBucket(d.statusLabel) === 'confirmed');
-    const pending   = items.filter(d => statusBucket(d.statusLabel) === 'pending');
-    const confirmedAmt = confirmed.reduce((s, d) => s + (Number(d.amt) || 0), 0);
-    const totalPipeline = items.reduce((s, d) => s + (Number(d.amt) || 0), 0);
-
-    document.getElementById('wc-summary').innerHTML = `
-      <div class="stat">
-        <span class="stat-label">제안</span>
-        <span class="stat-value">${total}<span class="unit">건</span></span>
-      </div>
-      <div class="stat confirmed">
-        <span class="stat-label">확정</span>
-        <span class="stat-value">${confirmed.length}<span class="unit">건</span><span class="amount">${confirmedAmt.toFixed(2)}억</span></span>
-      </div>
-      <div class="stat review">
-        <span class="stat-label">제안중</span>
-        <span class="stat-value">${pending.length}<span class="unit">건</span></span>
-      </div>
-    `;
-
-    document.getElementById('wc-pipeline').innerHTML =
-      `<strong>총 파이프라인</strong> ${totalPipeline.toFixed(1)}억 · <strong>확정</strong> ${confirmedAmt.toFixed(1)}억`;
-
-    const tbody = document.querySelector('#wc-table tbody');
-    tbody.innerHTML = '';
-    const isWcConfirmed = (d) => {
-      const cls = statusClass(d.statusLabel);
-      return cls === 'confirmed' || cls === 'internal';
-    };
-    const wcSorted = [
-      ...items.filter(isWcConfirmed),
-      ...items.filter(d => !isWcConfirmed(d))
-    ];
-    wcSorted.forEach((d, i) => {
-      const cls = statusClass(d.statusLabel);
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td style="color:var(--text-mute)">${i + 1}</td>
-        <td><span class="badge ${cls}">${d.statusLabel || '-'}</span></td>
-        <td class="advertiser">${d.adv}</td>
-        <td>${d.mgr || '-'}</td>
-        <td class="package">${d.pkg || '-'}</td>
-        <td class="num">${d.amt}억</td>
-        <td style="color:var(--text-mute);font-size:12px">${d.note || ''}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-    document.querySelector('#wc-table tfoot').innerHTML = `
-      <tr>
-        <td colspan="5">합계</td>
-        <td class="num">${totalPipeline.toFixed(1)}억</td>
-        <td></td>
-      </tr>
-    `;
   }
 
   // ===== 중앙리더스클럽 렌더 =====
@@ -1200,16 +940,29 @@
       return;
     }
 
+    // 테이블에는 확정/유력만 표시 (제안/드롭은 요약 매트릭스 표로만)
+    const tableItems = [...confirmed, ...likely];
+    const tableTotalAmt = tableItems.reduce((s, d) => s + (Number(d.price) || 0), 0);
+
     container.innerHTML = `
       <div class="table-scroll">
-        <table id="leaders-table">
+        <table id="leaders-table" class="leaders-fixed">
+          <colgroup>
+            <col style="width:40px">
+            <col style="width:80px">
+            <col style="width:80px">
+            <col style="min-width:200px">
+            <col style="width:80px">
+            <col style="min-width:160px">
+            <col style="width:100px">
+            <col>
+          </colgroup>
           <thead>
             <tr>
-              <th style="width:40px">#</th>
+              <th>#</th>
               <th>현황</th>
               <th>구분</th>
               <th>광고주</th>
-              <th>대행사</th>
               <th>담당자</th>
               <th>패키지</th>
               <th class="num">금액</th>
@@ -1219,8 +972,8 @@
           <tbody></tbody>
           <tfoot>
             <tr>
-              <td colspan="7">합계</td>
-              <td class="num">${fmt(totalAmt)}</td>
+              <td colspan="6">확정 + 유력 합계 (${tableItems.length}건)</td>
+              <td class="num">${fmt(tableTotalAmt)}</td>
               <td></td>
             </tr>
           </tfoot>
@@ -1229,21 +982,19 @@
     `;
 
     const tbody = container.querySelector('tbody');
-    sorted.forEach((d, i) => {
+    tableItems.forEach((d, i) => {
       const cls = statusClass(d.statusLabel);
-      // 시트의 '제안' 상태값은 화면에 '제안중'으로 표기
       const displayLabel = (d.statusLabel === '제안') ? '제안중' : (d.statusLabel || '-');
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td style="color:var(--text-mute)">${i + 1}</td>
         <td><span class="badge ${cls}">${displayLabel}</span></td>
         <td class="team">${d.group || '-'}</td>
-        <td class="advertiser">${d.adv}</td>
-        <td>${d.agency || '-'}</td>
+        <td class="advertiser" title="${d.adv}">${d.adv}</td>
         <td>${d.mgr || '-'}</td>
-        <td class="package">${d.pkg || '-'}</td>
+        <td class="package" title="${d.pkg || ''}">${d.pkg || '-'}</td>
         <td class="num ${d.price ? '' : 'empty'}">${d.price ? fmt(d.price) : '-'}</td>
-        <td style="color:var(--text-mute);font-size:12px">${d.note || ''}</td>
+        <td title="${d.note || ''}" style="color:var(--text-mute);font-size:12px">${d.note || ''}</td>
       `;
       tbody.appendChild(tr);
     });
