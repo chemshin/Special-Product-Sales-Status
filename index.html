@@ -2,1006 +2,345 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>중앙멤버스클럽 판매 현황 | 비솔본부</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>광고주 인텔리전스 · 비즈솔루션본부</title>
 <style>
-  :root {
-    --bg: #fafaf7;
-    --bg-soft: #f3f3ee;
-    --bg-card: #ffffff;
-    --bg-elevated: #f7f7f2;
-    --border: #e4e2da;
-    --border-soft: #ececdf;
-    --text: #1a1d24;
-    --text-soft: #4a4f5c;
-    --text-mute: #8a8f9c;
-    --accent: #8b6f3f;
-    --accent-soft: #8b6f3f15;
-    --gold: #b8945f;
-    --green: #3d8a5a;
-    --green-soft: #3d8a5a15;
-    --amber: #b8801f;
-    --amber-soft: #b8801f15;
-    --red: #b14545;
-    --red-soft: #b1454515;
-    --blue: #4a78a8;
-    --blue-soft: #4a78a815;
-    --purple: #7a5a9e;
-    --purple-soft: #7a5a9e15;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'IBM Plex Sans KR', -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  .wrap {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 48px 32px 80px;
-  }
-
-  header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    padding-bottom: 28px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 36px;
-    flex-wrap: wrap;
-    gap: 20px;
-  }
-
-  .brand-mark {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--text-mute);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
-
-  .brand-mark::before {
-    content: '';
-    width: 8px;
-    height: 8px;
-    background: var(--accent);
-    border-radius: 50%;
-  }
-
-  h1 {
-    font-family: 'Fraunces', serif;
-    font-weight: 500;
-    font-size: 42px;
-    letter-spacing: -0.02em;
-    line-height: 1.1;
-    color: var(--text);
-  }
-
-  h1 em {
-    font-style: italic;
-    font-weight: 400;
-    color: var(--accent);
-  }
-
-  .meta {
-    text-align: right;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: var(--text-mute);
-    line-height: 1.8;
-  }
-
-  .meta strong {
-    color: var(--text-soft);
-    font-weight: 500;
-  }
-
-  .refresh-btn {
-    margin-top: 8px;
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-mute);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    padding: 5px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .refresh-btn:hover {
-    color: var(--accent);
-    border-color: var(--accent);
-  }
-
-  .refresh-btn.loading {
-    opacity: 0.5;
-    pointer-events: none;
-  }
-
-  .refresh-btn.loading::before {
-    content: '';
-    width: 10px;
-    height: 10px;
-    border: 1.5px solid var(--text-mute);
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  .summary {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-    margin-bottom: 48px;
-  }
-
-  .summary-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 24px 28px;
-    position: relative;
-  }
-
-  .summary-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 3px;
-    background: var(--accent);
-    border-radius: 14px 14px 0 0;
-  }
-
-  .summary-card.wc::before { background: var(--blue); }
-  .summary-card.leaders::before { background: var(--purple); }
-
-  .summary-title {
-    font-family: 'Fraunces', serif;
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 18px;
-    letter-spacing: -0.01em;
-  }
-
-  .summary-stats {
-    display: flex;
-    gap: 24px;
-    flex-wrap: wrap;
-  }
-
-  .stat {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 84px;
-  }
-
-  .stat-label {
-    font-size: 11px;
-    color: var(--text-mute);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 500;
-  }
-
-  .stat-value {
-    font-family: 'IBM Plex Sans KR', -apple-system, sans-serif;
-    font-size: 26px;
-    font-weight: 700;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-  }
-
-  .stat-value .unit {
-    font-size: 13px;
-    color: var(--text-mute);
-    margin-left: 3px;
-    font-weight: 400;
-  }
-
-  .stat-value .amount {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    color: var(--green);
-    margin-left: 6px;
-    font-weight: 500;
-  }
-
-  .stat.confirmed .stat-value { color: var(--green); }
-  .stat.likely .stat-value { color: #5a9d76; }
-  .stat.review .stat-value { color: var(--amber); }
-  .stat.shortfall .stat-value { color: var(--red); }
-  .stat.dropped .stat-value { color: #9a9488; }
-
-  /* 그룹 구분선 - 다음 stat들을 새 줄로 밀어냄 */
-  .stat-divider {
-    flex-basis: 100%;
-    height: 1px;
-    background: var(--border-soft);
-    margin: 6px 0 2px;
-  }
-
-  /* 멤버스클럽 요약 매트릭스 표 */
-  /* 멤버스 테이블 - 한 줄 고정, 좁은 컬럼 줄바꿈 방지 */
-  #leaders-table.leaders-fixed { table-layout: fixed; }
-  #leaders-table.leaders-fixed td,
-  #leaders-table.leaders-fixed th {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  /* 광고주는 좀 길어도 표시 (줄바꿈은 막되 잘리면 ellipsis) */
-  #leaders-table.leaders-fixed td.advertiser { white-space: nowrap; }
-
-  /* 매트릭스 표 */
-  .summary-stats.has-matrix {
-    display: block;
-  }
-
-  .matrix-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-
-  .matrix-table thead th {
-    padding: 6px 12px;
-    text-align: right;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-mute);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .matrix-table thead th:first-child {
-    text-align: left;
-  }
-
-  .matrix-table thead th.c-confirmed { color: var(--green); }
-  .matrix-table thead th.c-likely { color: #5a9d76; }
-  .matrix-table thead th.c-proposed { color: var(--amber); }
-  .matrix-table thead th.c-dropped { color: #9a9488; }
-
-  .matrix-table tbody th {
-    padding: 9px 12px;
-    text-align: left;
-    font-weight: 600;
-    color: var(--text);
-    font-size: 13px;
-    border-bottom: 1px solid var(--border-soft);
-  }
-
-  .matrix-table tbody tr:last-child th,
-  .matrix-table tbody tr:last-child td {
-    border-bottom: none;
-  }
-
-  .matrix-table tbody tr.mx-total th,
-  .matrix-table tbody tr.mx-total td {
-    background: var(--bg-soft);
-  }
-
-  .matrix-table td.mx-num {
-    padding: 9px 12px;
-    text-align: right;
-    font-family: 'IBM Plex Sans KR', sans-serif;
-    font-variant-numeric: tabular-nums;
-    font-weight: 600;
-    font-size: 15px;
-    color: var(--text-soft);
-    border-bottom: 1px solid var(--border-soft);
-  }
-
-  .matrix-table td.mx-num.strong { color: var(--text); font-weight: 700; }
-  .matrix-table td.mx-num.c-confirmed { color: var(--green); }
-  .matrix-table td.mx-num.c-likely { color: #5a9d76; }
-  .matrix-table td.mx-num.c-proposed { color: var(--amber); }
-  .matrix-table td.mx-num.c-dropped { color: #9a9488; }
-
-  section.product {
-    margin-bottom: 56px;
-  }
-
-  .section-head {
-    display: flex;
-    align-items: baseline;
-    gap: 16px;
-    margin-bottom: 20px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--border);
-    flex-wrap: wrap;
-  }
-
-  .section-num {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: var(--accent);
-    background: var(--accent-soft);
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-  }
-
-  .section-title {
-    font-family: 'Fraunces', serif;
-    font-size: 28px;
-    font-weight: 500;
-    letter-spacing: -0.015em;
-  }
-
-  .section-sub {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--text-mute);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-left: auto;
-  }
-
-  .panel {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
-  }
-
-  .panel-meta {
-    padding: 16px 24px;
-    background: var(--bg-soft);
-    border-bottom: 1px solid var(--border-soft);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-    font-size: 12.5px;
-    color: var(--text-soft);
-  }
-
-  .panel-meta strong {
-    color: var(--text);
-    font-weight: 600;
-  }
-
-  .panel-meta .pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11.5px;
-    color: var(--text);
-  }
-
-  .panel-meta .pill .key {
-    color: var(--text-mute);
-  }
-
-  /* 부족분 - 빨간색 강조 */
-  .panel-meta .pill.shortfall {
-    background: var(--red-soft);
-    border-color: var(--red);
-    color: var(--red);
-  }
-  .panel-meta .pill.shortfall .key { color: var(--red); opacity: 0.7; }
-
-  /* 초과 달성 - 그린 */
-  .panel-meta .pill.achieved {
-    background: var(--green-soft);
-    border-color: var(--green);
-    color: var(--green);
-  }
-  .panel-meta .pill.achieved .key { color: var(--green); opacity: 0.7; }
-
-  .table-scroll { overflow-x: auto; }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13.5px;
-  }
-
-  thead th {
-    text-align: left;
-    padding: 13px 16px;
-    background: var(--bg-soft);
-    color: var(--text-mute);
-    font-weight: 600;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
-
-  thead th.num { text-align: right; }
-
-  tbody tr {
-    border-bottom: 1px solid var(--border-soft);
-  }
-
-  tbody tr:hover {
-    background: var(--bg-elevated);
-  }
-  tbody tr:last-child { border-bottom: none; }
-
-  tbody tr.internal { background: #faf6f8; }
-  tbody tr.internal:hover { background: #f5eff2; }
-
-  tbody td {
-    padding: 13px 16px;
-    color: var(--text-soft);
-    vertical-align: middle;
-  }
-
-  tbody td.num {
-    font-family: 'JetBrains Mono', monospace;
-    text-align: right;
-    color: var(--text);
-    font-variant-numeric: tabular-nums;
-    font-weight: 500;
-  }
-
-  tbody td.num.empty {
-    color: var(--text-mute);
-    font-weight: 400;
-  }
-
-  tbody td.advertiser {
-    color: var(--text);
-    font-weight: 600;
-  }
-
-  tbody td.package {
-    color: var(--text-soft);
-    font-size: 12.5px;
-    max-width: 280px;
-  }
-
-  tbody td.team {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11.5px;
-    color: var(--text-mute);
-  }
-
-  tfoot td {
-    padding: 16px;
-    background: var(--bg-soft);
-    border-top: 2px solid var(--border);
-    font-weight: 600;
-    color: var(--text);
-    font-size: 13px;
-  }
-
-  tfoot td.num {
-    font-family: 'JetBrains Mono', monospace;
-    text-align: right;
-    color: var(--accent);
-    font-variant-numeric: tabular-nums;
-    font-size: 14px;
-  }
-
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 11.5px;
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
-  .badge::before {
-    content: '';
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-  }
-
-  .badge.confirmed { background: var(--green-soft); color: var(--green); }
-  .badge.confirmed::before { background: var(--green); }
-
-  /* 유력 - 옅은 그린 (확정에 가까운 느낌) */
-  .badge.likely { background: rgba(61, 138, 90, 0.08); color: #5a9d76; }
-  .badge.likely::before { background: #5a9d76; }
-
-  /* 제안 - 베이지/뉴트럴 */
-  .badge.proposed { background: var(--bg-soft); color: var(--text-soft); border: 1px solid var(--border); }
-  .badge.proposed::before { background: var(--text-mute); }
-
-  .badge.final-review { background: var(--blue-soft); color: var(--blue); }
-  .badge.final-review::before { background: var(--blue); }
-
-  .badge.review { background: var(--amber-soft); color: var(--amber); }
-  .badge.review::before { background: var(--amber); }
-
-  .badge.canceled { background: var(--red-soft); color: var(--red); }
-  .badge.canceled::before { background: var(--red); }
-
-  /* 드롭/불가 - 회색 (탈락) */
-  .badge.dropped { background: #f0eeea; color: #9a9488; text-decoration: line-through; text-decoration-thickness: 1px; }
-  .badge.dropped::before { background: #b5afa3; }
-
-  .badge.internal { background: var(--purple-soft); color: var(--purple); }
-  .badge.internal::before { background: var(--purple); }
-
-  .badge.unknown { background: var(--bg-soft); color: var(--text-mute); }
-  .badge.unknown::before { background: var(--text-mute); }
-
-  .seat-block {
-    padding: 22px 24px;
-    background: linear-gradient(180deg, #fdfbf6 0%, #ffffff 100%);
-    border-bottom: 1px solid var(--border-soft);
-  }
-
-  .seat-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 10px;
-  }
-
-  .seat-label {
-    font-size: 13px;
-    color: var(--text-soft);
-    font-weight: 500;
-  }
-
-  .seat-value {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .seat-value .target {
-    color: var(--text-mute);
-    font-weight: 400;
-  }
-
-  .seat-bar {
-    height: 8px;
-    background: var(--bg-soft);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-
-  .seat-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), var(--gold));
-    border-radius: 4px;
-    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .seat-pct {
-    margin-top: 8px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--accent);
-    text-align: right;
-  }
-
-  /* Empty state */
-  .empty-state {
-    padding: 60px 24px;
-    text-align: center;
-    color: var(--text-mute);
-  }
-
-  .empty-icon {
-    font-size: 36px;
-    color: var(--purple);
-    opacity: 0.6;
-    margin-bottom: 14px;
-    font-family: 'Fraunces', serif;
-  }
-
-  .empty-title {
-    font-family: 'Fraunces', serif;
-    font-size: 17px;
-    font-weight: 500;
-    color: var(--text-soft);
-    margin-bottom: 6px;
-  }
-
-  .empty-desc {
-    font-size: 13px;
-    color: var(--text-mute);
-    line-height: 1.6;
-  }
-
-  /* Loading state */
-  .loading-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(250, 250, 247, 0.95);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-  }
-
-  .loading-overlay.hidden {
-    display: none;
-  }
-
-  .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  .loading-text {
-    margin-top: 16px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: var(--text-mute);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  .loading-content {
-    text-align: center;
-  }
-
-  /* Error state */
-  .error-banner {
-    background: var(--red-soft);
-    border: 1px solid var(--red);
-    color: var(--red);
-    padding: 14px 20px;
-    border-radius: 10px;
-    margin-bottom: 24px;
-    font-size: 13px;
-  }
-
-  .error-banner strong { font-weight: 600; }
-
-  @media (max-width: 1100px) {
-    .summary { grid-template-columns: repeat(2, 1fr); }
-  }
-
-  @media (max-width: 800px) {
-    .wrap { padding: 28px 16px 60px; }
-    h1 { font-size: 28px; }
-    .section-title { font-size: 22px; }
-    .summary { grid-template-columns: 1fr; }
-    .meta { text-align: left; }
-    header { align-items: flex-start; }
-  }
+:root{
+  --brand:#F6520A; --brand-deep:#FF3C13; --brand-tint:#FFF3ED;
+  --ink:#1B1B1F; --ink-soft:#55555E; --ink-faint:#9A9AA3;
+  --paper:#F7F6F3; --card:#FFFFFF; --line:#E8E6E1;
+  --fact:#2B2B33; --ai-line:#F6520A;
+  --win:#0E8A4A; --lose:#C0392B; --pend:#B07800;
+  --radius:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",sans-serif;
+  background:var(--paper);color:var(--ink);line-height:1.55;
+  max-width:520px;margin:0 auto;min-height:100vh;padding-bottom:60px;
+}
+.topbar{position:sticky;top:0;z-index:50;background:var(--ink);color:#fff;padding:14px 18px 12px}
+.topbar .org{font-size:11px;letter-spacing:.14em;color:var(--brand);font-weight:700}
+.topbar h1{font-size:17px;font-weight:800;letter-spacing:-.02em;margin-top:1px}
+.searchwrap{position:relative;margin-top:12px}
+.searchwrap input{width:100%;padding:12px 14px 12px 40px;border:none;border-radius:10px;font-size:15px;background:#2A2A31;color:#fff;outline:none}
+.searchwrap input::placeholder{color:#7A7A85}
+.searchwrap input:focus{box-shadow:0 0 0 2px var(--brand)}
+.searchwrap .icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;fill:none;stroke:#8A8A94;stroke-width:2.2}
+.suggest{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--card);border-radius:10px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.22);display:none}
+.suggest.show{display:block}
+.suggest button{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;padding:12px 14px;border:none;background:none;text-align:left;font-size:14px;color:var(--ink);cursor:pointer;border-bottom:1px solid var(--line)}
+.suggest button:last-child{border-bottom:none}
+.suggest button:active{background:var(--brand-tint)}
+.suggest .alias{font-size:12px;color:var(--ink-faint)}
+
+.landing{padding:22px 18px}
+.landing .mark{font-size:11px;letter-spacing:.12em;color:var(--ink-faint);font-weight:700;margin-bottom:10px}
+.landing .chips{display:flex;flex-wrap:wrap;gap:8px}
+.landing .chips button{padding:9px 15px;border:1px solid var(--line);border-radius:999px;background:var(--card);font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer}
+.landing .chips button:active{border-color:var(--brand);color:var(--brand)}
+.landing .ai-notice{font-size:11.5px;color:var(--ink-faint);margin-top:16px;line-height:1.5}
+.landing .err{margin-top:14px;font-size:13px;color:var(--lose);display:none}
+
+.loading{padding:70px 30px;text-align:center;display:none}
+.loading.show{display:block}
+.loading .name{font-size:20px;font-weight:800;margin-bottom:26px}
+.steps{display:flex;flex-direction:column;gap:14px;max-width:280px;margin:0 auto;text-align:left}
+.step{display:flex;align-items:center;gap:11px;font-size:14px;color:var(--ink-faint);transition:color .3s}
+.step .dot{flex:none;width:18px;height:18px;border-radius:50%;border:2px solid var(--line);transition:all .3s;position:relative}
+.step.active{color:var(--ink);font-weight:600}
+.step.active .dot{border-color:var(--brand)}
+.step.active .dot::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--brand);animation:pulse 1s infinite}
+.step.done{color:var(--ink-soft)}
+.step.done .dot{border-color:var(--win);background:var(--win)}
+.step.done .dot::after{content:"✓";position:absolute;inset:0;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center}
+@keyframes pulse{50%{opacity:.35}}
+
+.report{display:none;padding:0 16px}
+.report.show{display:block}
+.dossier{background:var(--ink);color:#fff;border-radius:0 0 var(--radius) var(--radius);margin:0 -16px 18px;padding:22px 22px 20px}
+.dossier .cat{font-size:11px;letter-spacing:.12em;color:var(--brand);font-weight:700}
+.dossier h2{font-size:28px;font-weight:800;letter-spacing:-.03em;margin:3px 0 2px}
+.dossier .aliases{font-size:12px;color:#9A9AA3;margin-bottom:16px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kpi{background:#2A2A31;border-radius:10px;padding:10px 12px}
+.kpi .v{font-size:15px;font-weight:800;letter-spacing:-.02em;line-height:1.25;word-break:keep-all}
+.kpi .k{font-size:10.5px;color:#8A8A94;margin-top:1px}
+.kpi .v .grade{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;border-radius:8px;padding:0 7px;font-size:15px;font-weight:800;color:#fff}
+.grade.gS{background:var(--brand)} .grade.gA{background:#3A6EA5} .grade.gB{background:#6B7280} .grade.gD{background:#B07800}
+.kpi .gl{font-size:10px;color:#B8B8C0;margin-left:5px}
+
+.sec{background:var(--card);border-radius:var(--radius);border:1px solid var(--line);padding:16px 16px 14px;margin-bottom:14px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:12px}
+.sec-h .no{font-size:11px;font-weight:800;color:var(--ink-faint);letter-spacing:.06em}
+.sec-h h3{font-size:15px;font-weight:800;letter-spacing:-.01em;display:inline}
+.tag-fact{font-size:10.5px;font-weight:700;color:var(--ink-soft);background:var(--paper);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+.tag-ai{font-size:10.5px;font-weight:700;color:var(--brand-deep);background:var(--brand-tint);border:1px solid #FBD0BC;padding:2px 8px;border-radius:999px}
+.sec.ai{border:1.5px dashed var(--ai-line);background:linear-gradient(180deg,#FFFBF9 0%,#fff 100%)}
+.empty{font-size:12.5px;color:var(--ink-faint);padding:6px 0}
+
+.exec-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.exec-row:last-child{border-bottom:none}
+.exec-row .m{font-size:14px;font-weight:700}
+.exec-row .p{font-size:12px;color:var(--ink-faint)}
+.exec-row .amt{font-size:14.5px;font-weight:800;letter-spacing:-.01em;text-align:right}
+.exec-sum{display:flex;justify-content:space-between;margin-top:10px;padding-top:11px;border-top:2px solid var(--ink);font-size:13.5px;font-weight:800}
+
+.tl{position:relative;padding-left:20px}
+.tl::before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl-item{position:relative;padding-bottom:16px}
+.tl-item:last-child{padding-bottom:2px}
+.tl-item::before{content:"";position:absolute;left:-19px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--card);border:2.5px solid var(--fact)}
+.tl-item .d{font-size:11.5px;font-weight:700;color:var(--ink-faint)}
+.tl-item .d .src{font-weight:600;color:var(--brand);margin-left:6px}
+.tl-item .b{font-size:13.5px;margin-top:2px;white-space:pre-line}
+
+.comp-row{padding:11px 0;border-bottom:1px solid var(--line)}
+.comp-row:last-child{border-bottom:none}
+.comp-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.comp-top .media{font-size:14px;font-weight:700}
+.comp-top .mo{font-size:11.5px;color:var(--ink-faint)}
+.comp-sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+
+.news{padding:11px 0;border-bottom:1px solid #F3E4DB}
+.news:last-child{border-bottom:none}
+.news .h{font-size:13.5px;font-weight:700;line-height:1.45}
+.news .meta{font-size:11.5px;color:var(--ink-faint);margin-top:3px}
+.news .sum{font-size:12.5px;color:var(--ink-soft);margin-top:4px}
+
+.insight-lead{font-size:14.5px;font-weight:700;line-height:1.6;letter-spacing:-.01em;padding:12px 14px;background:var(--ink);color:#fff;border-radius:10px;margin-bottom:12px}
+.act{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #F3E4DB;font-size:13px}
+.act:last-child{border-bottom:none}
+.act .n{flex:none;width:19px;height:19px;border-radius:6px;background:var(--brand);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.act b{letter-spacing:-.01em}
+.act .d2{font-size:12.5px;color:var(--ink-soft);margin-top:1px}
+.disclaimer{font-size:11px;color:var(--ink-faint);margin-top:12px;padding-top:10px;border-top:1px dashed #F0D9CC;line-height:1.5}
+
+.yr-h{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:800;color:var(--brand-deep);background:var(--brand-tint);border-radius:7px;padding:5px 10px;margin:10px 0 2px}
+.yr-h:first-child{margin-top:0}
+
+.back{display:block;width:100%;margin:6px 0 20px;padding:13px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-size:14px;font-weight:700;color:var(--ink);cursor:pointer}
+.pdf-btn{display:block;width:100%;margin:0 0 8px;padding:13px;border:none;border-radius:10px;background:var(--ink);font-size:14px;font-weight:700;color:#fff;cursor:pointer}
+.gen-time{font-size:11px;color:var(--ink-faint);text-align:center;margin-bottom:14px}
+
+@media print{
+  body{max-width:none;background:#fff;padding:0}
+  .topbar,.pdf-btn,.back{display:none!important}
+  .report{padding:0 4mm}
+  .dossier{margin:0 0 14px;border-radius:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sec{break-inside:avoid;box-shadow:none}
+  .sec.ai{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .kpi,.grade,.yr-h,.tag-ai,.tag-fact,.insight-lead{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 </style>
 </head>
 <body>
 
-<!-- 로딩 오버레이 -->
-<div class="loading-overlay" id="loading">
-  <div class="loading-content">
-    <div class="loading-spinner"></div>
-    <div class="loading-text">데이터 로딩 중</div>
+<div class="topbar">
+  <div class="org">JOONGANG · 비즈솔루션본부</div>
+  <h1>광고주 인텔리전스</h1>
+  <div class="searchwrap">
+    <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="q" type="text" placeholder="광고주명 입력" autocomplete="off">
+    <div class="suggest" id="suggest"></div>
   </div>
 </div>
 
-<div class="wrap">
-
-  <header>
-    <div>
-      <div class="brand-mark">JoongAng Ilbo · 비즈솔루션본부</div>
-      <h1>중앙멤버스클럽 <em>판매 현황</em></h1>
-    </div>
-    <div class="meta">
-      <strong>2026. 6</strong><br>
-      <span id="updated-at">로딩 중...</span><br>
-      <button class="refresh-btn" id="refresh-btn" onclick="loadData()">새로고침</button>
-    </div>
-  </header>
-
-  <div id="error-container"></div>
-
-  <!-- ============ 상단 요약 ============ -->
-  <div class="summary">
-    <div class="summary-card leaders">
-      <div class="summary-stats has-matrix" id="leaders-summary">
-        <div class="stat"><span class="stat-label">전체</span><span class="stat-value">-</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============ 중앙멤버스클럽 ============ -->
-  <section class="product">
-    <div class="section-head">
-      <h2 class="section-title">중앙멤버스클럽</h2>
-      <span class="section-sub">확정 · 유력 광고주 목록 · 천원 단위</span>
-    </div>
-
-    <div class="panel">
-      <div class="panel-meta">
-        <div>
-          <strong>제안 패키지</strong> 스탠다드 / 프리미엄
-        </div>
-        <div id="leaders-pipeline"></div>
-      </div>
-      <div id="leaders-content"></div>
-    </div>
-  </section>
-
+<div class="landing" id="landing">
+  <div class="mark">최근 조회</div>
+  <div class="chips" id="recentChips"></div>
+  <p class="ai-notice">리포트 일부는 AI가 생성한 내용으로, 부정확하거나 실제와 다른 정보가 포함될 수 있습니다.</p>
+  <p class="err" id="errMsg"></p>
 </div>
+
+<div class="loading" id="loading">
+  <div class="name" id="loadName"></div>
+  <div class="steps">
+    <div class="step" id="s1"><span class="dot"></span>내부 데이터 취합 중</div>
+    <div class="step" id="s2"><span class="dot"></span>최근 기사 검색 중 (Claude API)</div>
+    <div class="step" id="s3"><span class="dot"></span>공략 인사이트 생성 중</div>
+  </div>
+</div>
+
+<div class="report" id="report"></div>
 
 <script>
-  // ===== GAS Web App URL =====
-  // 배포 후 발급받은 URL을 여기에 붙여넣으세요
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbyP0mybcCfcpnSreGXPKhWoavdWuzvWgXBdS88uhrNkmnMnLp0sTcnpwCQe7nJqNvLh/exec';
+const API = 'https://script.google.com/macros/s/AKfycbwL_hT8TQiZ2DfyN6CbtST9vU1VNl2XUaNFel6atJD2zJAOybsO1BVHqowfBF-LOLSj/exec';
+const GRADE_LABEL = { S:'핵심 유지', A:'성장 공략', B:'윈백', D:'신규 개척' };
 
-  // ===== Helpers =====
-  const fmt = n => Number(n || 0).toLocaleString('ko-KR');
+const q = document.getElementById('q');
+const suggest = document.getElementById('suggest');
+const errMsg = document.getElementById('errMsg');
 
-  // 상황 텍스트 → 뱃지 클래스 매핑
-  function statusClass(label) {
-    if (!label) return 'unknown';
-    const s = String(label).trim();
+// ── 유틸 ──
+function esc(s){const d=document.createElement('div');d.textContent=String(s==null?'':s);return d.innerHTML;}
+function fmtWon(v){ // 원 단위 → 억/만원
+  v = Number(v)||0;
+  if(v>=1e8) return (v/1e8).toFixed(v%1e8===0?0:1).replace(/\.0$/,'')+'억';
+  if(v>=1e4) return Math.round(v/1e4).toLocaleString()+'만원';
+  return v.toLocaleString()+'원';
+}
+function fmtManwon(v){ return fmtWon((Number(v)||0)*1e4); } // 만원 단위 입력
+function getRecent(){ try{ return JSON.parse(localStorage.getItem('advRecent')||'[]'); }catch(e){ return []; } }
+function pushRecent(name){
+  try{
+    let r = getRecent().filter(x=>x!==name); r.unshift(name);
+    localStorage.setItem('advRecent', JSON.stringify(r.slice(0,6)));
+  }catch(e){}
+}
+function renderChips(){
+  const r = getRecent();
+  document.getElementById('recentChips').innerHTML =
+    (r.length? r : ['미우미우','올리브영','디아지오코리아'])
+    .map(n=>`<button onclick="run('${esc(n)}')">${esc(n)}</button>`).join('');
+}
+renderChips();
 
-    // 정확한 단어 매칭 우선
-    if (s === '확정' || s === '진행 확정' || s.startsWith('계산서')) return 'confirmed';
-    if (s === '유력') return 'likely';
-    if (s === '제안') return 'proposed';
-    if (s === '검토' || s === '검토중') return 'review';
-    if (s === '드롭' || s === '드랍' || s === '불가' || s === '미집행' || s === '취소') return 'dropped';
+// ── 자동완성 (디바운스) ──
+let debounce=null;
+q.addEventListener('input', ()=>{
+  clearTimeout(debounce);
+  const v=q.value.trim();
+  if(!v){suggest.classList.remove('show');return;}
+  debounce=setTimeout(async ()=>{
+    try{
+      const res=await fetch(`${API}?action=search&q=${encodeURIComponent(v)}`);
+      const data=await res.json();
+      if(!data.items||!data.items.length){suggest.classList.remove('show');return;}
+      suggest.innerHTML=data.items.map(it=>{
+        const tag = it.registered===false ? '마스터 미등록' : (it.matched?`"${esc(it.matched)}" 매칭`:'');
+        return `<button onclick="run('${esc(it.name)}')"><b>${esc(it.name)}</b><span class="alias">${tag}</span></button>`;
+      }).join('');
+      suggest.classList.add('show');
+    }catch(e){/* 무시 */}
+  },300);
+});
+q.addEventListener('keydown',e=>{ if(e.key==='Enter'&&q.value.trim()) run(q.value.trim()); });
 
-    // '검토' 키워드가 들어간 긴 텍스트 (예: '제안서 전달 및 검토 중')
-    if (s.includes('검토')) return 'review';
+// ── 리포트 실행 ──
+let stepTimers=[];
+function setSteps(){
+  ['s1','s2','s3'].forEach(s=>document.getElementById(s).className='step');
+  stepTimers.forEach(clearTimeout); stepTimers=[];
+  stepTimers.push(setTimeout(()=>document.getElementById('s1').classList.add('active'),100));
+  stepTimers.push(setTimeout(()=>{const e=document.getElementById('s1');e.classList.remove('active');e.classList.add('done');document.getElementById('s2').classList.add('active');},900));
+  stepTimers.push(setTimeout(()=>{const e=document.getElementById('s2');e.classList.remove('active');e.classList.add('done');document.getElementById('s3').classList.add('active');},6000));
+}
+async function run(name){
+  suggest.classList.remove('show'); errMsg.style.display='none';
+  q.value=name; q.blur();
+  document.getElementById('landing').style.display='none';
+  document.getElementById('report').classList.remove('show');
+  const L=document.getElementById('loading');
+  L.classList.add('show');
+  document.getElementById('loadName').textContent=name+' 리포트 생성';
+  setSteps();
+  try{
+    const res=await fetch(`${API}?action=report&adv=${encodeURIComponent(name)}`);
+    const data=await res.json();
+    if(data.error==='not_found'){ throw new Error(`'${name}' 을(를) 실적·영업일지·주간보고·경쟁매체 어디에서도 찾지 못했습니다.`); }
+    if(data.error){ throw new Error(data.error); }
+    stepTimers.forEach(clearTimeout);
+    ['s1','s2','s3'].forEach(s=>{const e=document.getElementById(s);e.classList.remove('active');e.classList.add('done');});
+    pushRecent(data.name);
+    setTimeout(()=>{ L.classList.remove('show'); render(data); },350);
+  }catch(err){
+    stepTimers.forEach(clearTimeout);
+    L.classList.remove('show');
+    document.getElementById('landing').style.display='block';
+    errMsg.textContent='⚠ '+err.message;
+    errMsg.style.display='block';
+    renderChips();
+  }
+}
 
-    // 내부 활용 (임윤찬 내부 VIP용)
-    if (s === '확정 (내부)' || s === '내부 활용' || s === '내부 VIP용') return 'internal';
+// ── 렌더링 ──
+function render(d){
+  const R=document.getElementById('report');
+  const now=new Date();
+  const ts=`${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const g=(d.kpi&&d.kpi.grade)||'D';
+  const execTotal=(d.exec||[]).reduce((s,e)=>s+(Number(e.amount)||0),0);
 
-    // 최종 협의
-    if (s === '최종 협의 중' || s === '최종협의중') return 'final-review';
-
-    // 미집행/취소
-    if (s === '미집행' || s === '취소' || s === '드랍') return 'canceled';
-
-    // 협의 (오래된 임윤찬 상태값)
-    if (s === '협의 중' || s === '협의중' || s === '미정') return 'review';
-
-    // 그 외 분류되지 않은 텍스트는 review로 (안전)
-    return 'review';
+  let execHtml;
+  if(d.exec&&d.exec.length){
+    const byYear={};
+    d.exec.forEach(e=>{const y=e.year||(e.from||'').slice(0,4)||'기타';(byYear[y]=byYear[y]||[]).push(e);});
+    const years=Object.keys(byYear).sort((a,b)=>b.localeCompare(a));
+    execHtml=years.map(y=>{
+      const rows=byYear[y];
+      const sub=rows.reduce((s,e)=>s+(Number(e.amount)||0),0);
+      return `<div class="yr-h"><span>${esc(y)}년</span><span>${fmtWon(sub)}</span></div>`
+        + rows.map(e=>`<div class="exec-row"><div><div class="m">${esc(e.media)}</div><div class="p">${esc(e.from)}${e.from!==e.to?' ~ '+esc(e.to):''}${e.owner?' · '+esc(e.owner):''}</div></div><div><div class="amt">${fmtWon(e.amount)}</div></div></div>`).join('');
+    }).join('')
+    + `<div class="exec-sum"><span>누적 집행</span><span>${fmtWon(execTotal)}</span></div>`;
+  } else {
+    execHtml=`<div class="empty">자사 집행 이력이 없습니다. (신규 개척 대상)</div>`;
   }
 
-  // 상황 → 카테고리 (요약 카운트용)
-  function statusBucket(label) {
-    const cls = statusClass(label);
-    if (cls === 'confirmed' || cls === 'internal') return 'confirmed';
-    return 'pending';
-  }
+  const tlHtml=(d.timeline&&d.timeline.length)
+    ? `<div class="tl">${d.timeline.map(t=>`<div class="tl-item"><div class="d">${esc(t.date)}<span class="src">${esc(t.src)}</span></div><div class="b">${esc(t.body)}</div></div>`).join('')}</div>`
+    : `<div class="empty">영업일지·주간보고에 기록이 없습니다.</div>`;
 
-  // ===== 메인 =====
-  async function loadData() {
-    const refreshBtn = document.getElementById('refresh-btn');
-    const errorContainer = document.getElementById('error-container');
-    refreshBtn.classList.add('loading');
-    errorContainer.innerHTML = '';
+  const compHtml=(d.competitors&&d.competitors.length)
+    ? d.competitors.map(c=>`<div class="comp-row"><div class="comp-top"><span class="media">${esc(c.media)}</span><span class="mo">${esc(c.month)}${c.team?' · '+esc(c.team):''}</span></div><div class="comp-sub">${esc(c.campaign)}${c.detail?' · '+esc(c.detail):''}</div></div>`).join('')
+    : `<div class="empty">경쟁매체 노출 기록이 없습니다.</div>`;
 
-    if (GAS_URL === 'YOUR_GAS_URL_HERE') {
-      showError('GAS_URL이 설정되지 않았습니다. HTML 파일을 열어 GAS_URL 상수에 배포된 웹 앱 URL을 붙여넣으세요.');
-      document.getElementById('loading').classList.add('hidden');
-      refreshBtn.classList.remove('loading');
-      return;
-    }
+  const newsHtml=(d.news&&d.news.length)
+    ? d.news.map(n=>`<div class="news"><div class="h">${esc(n.h)}</div><div class="meta">${esc(n.meta)}</div><div class="sum">${esc(n.sum)}</div></div>`).join('')
+    : `<div class="empty">AI 이슈 검색 결과가 없습니다.</div>`;
 
-    try {
-      const res = await fetch(GAS_URL);
-      const data = await res.json();
+  const ins=d.insight||{};
+  const insHtml=
+    (ins.lead?`<div class="insight-lead">${esc(ins.lead)}</div>`:'')
+    +((ins.acts&&ins.acts.length)
+      ? ins.acts.map((a,i)=>`<div class="act"><span class="n">${i+1}</span><div><b>${esc(a.b)}</b><div class="d2">${esc(a.d)}</div></div></div>`).join('')
+      : `<div class="empty">인사이트 생성 결과가 없습니다.</div>`);
 
-      if (data.error) throw new Error(data.error);
+  R.innerHTML=`
+  <div class="dossier">
+    <div class="cat">${esc(d.industry||'')}${d.parent?' · '+esc(d.parent):''}${d.owner?' · 담당 '+esc(d.owner):''}</div>
+    <h2>${esc(d.name)}</h2>
+    <div class="aliases">${d.registered===false?'⚠ 마스터 미등록 — 원본 데이터 직접 조회 (별칭·업종 등록 권장)':(d.aliases?'별칭: '+esc(d.aliases):'')}</div>
+    <div class="kpis">
+      <div class="kpi"><div class="v">${fmtManwon(d.kpi&&d.kpi.total)}</div><div class="k">누적 집행${d.kpi&&d.kpi.lastMonth?' · 최근 '+esc(d.kpi.lastMonth):''}</div></div>
+      <div class="kpi"><div class="v">${esc((d.kpi&&d.kpi.topMedia)||'—')}</div><div class="k">주요 매체</div></div>
+      <div class="kpi"><div class="v"><span class="grade g${esc(g)}">${esc(g)}</span><span class="gl">${GRADE_LABEL[g]||''}</span></div><div class="k">거래 등급</div></div>
+    </div>
+  </div>
 
-      renderLeaders(data.leaders);
+  <div class="sec"><div class="sec-h"><div><span class="no">01</span> <h3>매체 집행 내역</h3></div><span class="tag-fact">내부 기록</span></div>${execHtml}</div>
+  <div class="sec"><div class="sec-h"><div><span class="no">02</span> <h3>영업 접점 타임라인</h3></div><span class="tag-fact">내부 기록</span></div>${tlHtml}</div>
+  <div class="sec"><div class="sec-h"><div><span class="no">03</span> <h3>경쟁매체 노출 현황</h3></div><span class="tag-fact">내부 기록</span></div>${compHtml}</div>
+  <div class="sec ai"><div class="sec-h"><div><span class="no">04</span> <h3>최근 이슈</h3></div><span class="tag-ai">AI 웹검색</span></div>${newsHtml}</div>
+  <div class="sec ai"><div class="sec-h"><div><span class="no">05</span> <h3>공략 인사이트</h3></div><span class="tag-ai">AI 생성 · 참고용</span></div>${insHtml}
+    <div class="disclaimer">⚠️ 04·05번은 AI가 웹검색과 내부 데이터를 바탕으로 생성한 참고 자료입니다. 광고주 미팅에서 인용하기 전 팩트 확인이 필요합니다.</div>
+  </div>
 
-      // updated 시각
-      const updated = new Date(data.updatedAt);
-      document.getElementById('updated-at').textContent =
-        'Updated ' + updated.toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+  <div class="gen-time">리포트 생성 ${ts}</div>
+  <button class="pdf-btn" onclick="exportPdf('${esc(d.name)}')">PDF로 저장</button>
+  <button class="back" onclick="reset()">← 다른 광고주 검색</button>`;
+  R.classList.add('show');
+  window.scrollTo({top:0});
+}
 
-      document.getElementById('loading').classList.add('hidden');
-    } catch (err) {
-      showError('데이터를 불러오는 중 오류가 발생했습니다: ' + err.message);
-      document.getElementById('loading').classList.add('hidden');
-    } finally {
-      refreshBtn.classList.remove('loading');
-    }
-  }
+function exportPdf(name){
+  const orig=document.title;
+  const now=new Date();
+  document.title=`광고주리포트_${name}_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+  window.print();
+  setTimeout(()=>{document.title=orig;},1000);
+}
 
-  function showError(msg) {
-    document.getElementById('error-container').innerHTML =
-      `<div class="error-banner"><strong>오류</strong> · ${msg}</div>`;
-  }
-
-  // ===== 중앙리더스클럽 렌더 =====
-  function renderLeaders(leaders) {
-    if (!leaders) return;
-    const items = leaders.items || [];
-
-    // 4단계 분류
-    const clsOf = (d) => statusClass(d.statusLabel);
-    const isConfirmed = (d) => { const c = clsOf(d); return c === 'confirmed' || c === 'internal'; };
-    const isLikely    = (d) => clsOf(d) === 'likely';
-    const isDropped   = (d) => clsOf(d) === 'dropped' || clsOf(d) === 'canceled';
-    const isProposed  = (d) => { const c = clsOf(d); return c === 'proposed' || c === 'review' || c === 'final-review'; };
-
-    const total     = items.length;
-    const confirmed = items.filter(isConfirmed);
-    const likely    = items.filter(isLikely);
-    const proposed  = items.filter(isProposed);
-    const dropped   = items.filter(isDropped);
-
-    const confirmedAmt = confirmed.reduce((s, d) => s + (Number(d.price) || 0), 0);
-    const likelyAmt    = likely.reduce((s, d) => s + (Number(d.price) || 0), 0);
-    const totalAmt     = items.reduce((s, d) => s + (Number(d.price) || 0), 0);
-
-    // 그룹별 (마솔국 / 콘사국) - 드롭 제외한 유효 건수
-    const groupOf = (d) => {
-      const g = String(d.group || '').trim();
-      if (g.indexOf('마솔') !== -1) return '마솔국';
-      if (g.indexOf('콘사') !== -1) return '콘사국';
-      return '기타';
-    };
-    const masol = items.filter(d => groupOf(d) === '마솔국');
-    const consa = items.filter(d => groupOf(d) === '콘사국');
-
-    // 정렬: 확정 → 유력 → 제안 → 드롭 순
-    const sorted = [...confirmed, ...likely, ...proposed, ...dropped,
-                    ...items.filter(d => !isConfirmed(d) && !isLikely(d) && !isProposed(d) && !isDropped(d))];
-
-    // 국별 x 상태별 집계 함수
-    const countBy = (arr, pred) => arr.filter(pred).length;
-    const buildRow = (arr) => ({
-      total: arr.length,
-      confirmed: countBy(arr, isConfirmed),
-      likely: countBy(arr, isLikely),
-      proposed: countBy(arr, isProposed),
-      dropped: countBy(arr, isDropped)
-    });
-    const rowAll   = buildRow(items);
-    const rowMasol = buildRow(masol);
-    const rowConsa = buildRow(consa);
-
-    const cell = (v, cls) => `<td class="mx-num ${cls || ''}">${v}</td>`;
-    document.getElementById('leaders-summary').innerHTML = `
-      <table class="matrix-table">
-        <thead>
-          <tr>
-            <th></th>
-            <th>전체</th>
-            <th class="c-confirmed">확정</th>
-            <th class="c-likely">유력</th>
-            <th class="c-proposed">제안</th>
-            <th class="c-dropped">드롭</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="mx-total">
-            <th>전체</th>
-            ${cell(rowAll.total,'strong')}${cell(rowAll.confirmed,'c-confirmed')}${cell(rowAll.likely,'c-likely')}${cell(rowAll.proposed,'c-proposed')}${cell(rowAll.dropped,'c-dropped')}
-          </tr>
-          <tr>
-            <th>마솔국</th>
-            ${cell(rowMasol.total,'strong')}${cell(rowMasol.confirmed,'c-confirmed')}${cell(rowMasol.likely,'c-likely')}${cell(rowMasol.proposed,'c-proposed')}${cell(rowMasol.dropped,'c-dropped')}
-          </tr>
-          <tr>
-            <th>콘사국</th>
-            ${cell(rowConsa.total,'strong')}${cell(rowConsa.confirmed,'c-confirmed')}${cell(rowConsa.likely,'c-likely')}${cell(rowConsa.proposed,'c-proposed')}${cell(rowConsa.dropped,'c-dropped')}
-          </tr>
-        </tbody>
-      </table>
-    `;
-
-    document.getElementById('leaders-pipeline').innerHTML = total > 0
-      ? `<strong>총 ${total}건</strong> · 확정 ${(confirmedAmt/100000).toFixed(2)}억 · 유력 ${(likelyAmt/100000).toFixed(2)}억`
-      : `<strong>제안 0건</strong> · 데이터 입력 대기`;
-
-    const container = document.getElementById('leaders-content');
-
-    if (items.length === 0) {
-      container.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">◷</div>
-          <div class="empty-title">제안 데이터 입력 대기 중</div>
-          <div class="empty-desc">시트에 광고주별 제안 정보가 입력되면 이 영역에 자동으로 표시됩니다.</div>
-        </div>
-      `;
-      return;
-    }
-
-    // 테이블에는 확정/유력만 표시 (제안/드롭은 요약 매트릭스 표로만)
-    const tableItems = [...confirmed, ...likely];
-    const tableTotalAmt = tableItems.reduce((s, d) => s + (Number(d.price) || 0), 0);
-
-    container.innerHTML = `
-      <div class="table-scroll">
-        <table id="leaders-table" class="leaders-fixed">
-          <colgroup>
-            <col style="width:40px">
-            <col style="width:80px">
-            <col style="width:80px">
-            <col style="min-width:200px">
-            <col style="width:80px">
-            <col style="min-width:160px">
-            <col style="width:100px">
-            <col>
-          </colgroup>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>현황</th>
-              <th>구분</th>
-              <th>광고주</th>
-              <th>담당자</th>
-              <th>패키지</th>
-              <th class="num">금액</th>
-              <th>비고</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-          <tfoot>
-            <tr>
-              <td colspan="6">확정 + 유력 합계 (${tableItems.length}건)</td>
-              <td class="num">${fmt(tableTotalAmt)}</td>
-              <td></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-    `;
-
-    const tbody = container.querySelector('tbody');
-    tableItems.forEach((d, i) => {
-      const cls = statusClass(d.statusLabel);
-      const displayLabel = (d.statusLabel === '제안') ? '제안중' : (d.statusLabel || '-');
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td style="color:var(--text-mute)">${i + 1}</td>
-        <td><span class="badge ${cls}">${displayLabel}</span></td>
-        <td class="team">${d.group || '-'}</td>
-        <td class="advertiser" title="${d.adv}">${d.adv}</td>
-        <td>${d.mgr || '-'}</td>
-        <td class="package" title="${d.pkg || ''}">${d.pkg || '-'}</td>
-        <td class="num ${d.price ? '' : 'empty'}">${d.price ? fmt(d.price) : '-'}</td>
-        <td title="${d.note || ''}" style="color:var(--text-mute);font-size:12px">${d.note || ''}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  // 초기 로드
-  loadData();
+function reset(){
+  document.getElementById('report').classList.remove('show');
+  document.getElementById('landing').style.display='block';
+  q.value=''; errMsg.style.display='none';
+  renderChips();
+  window.scrollTo({top:0});
+}
+document.addEventListener('click',e=>{ if(!e.target.closest('.searchwrap')) suggest.classList.remove('show'); });
 </script>
 </body>
 </html>
