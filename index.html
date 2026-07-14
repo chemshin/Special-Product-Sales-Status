@@ -117,6 +117,13 @@ body{
 .act .d2{font-size:12.5px;color:var(--ink-soft);margin-top:1px}
 .disclaimer{font-size:11px;color:var(--ink-faint);margin-top:12px;padding-top:10px;border-top:1px dashed #F0D9CC;line-height:1.5}
 
+.confirm-card{text-align:center;padding:10px 6px 4px}
+.confirm-card .ct{font-size:14.5px;font-weight:800;letter-spacing:-.01em}
+.confirm-card .cd{font-size:12.5px;color:var(--ink-soft);margin:8px 0 14px;line-height:1.6}
+.confirm-card .cd b{color:var(--brand-deep)}
+.confirm-btn{padding:12px 26px;border:none;border-radius:10px;background:var(--brand);color:#fff;font-size:14px;font-weight:800;cursor:pointer}
+.confirm-btn:active{background:var(--brand-deep)}
+
 .yr-h{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:800;color:var(--brand-deep);background:var(--brand-tint);border-radius:7px;padding:5px 10px;margin:10px 0 2px}
 .yr-h:first-child{margin-top:0}
 
@@ -227,7 +234,7 @@ function setSteps(){
   stepTimers.push(setTimeout(()=>{const e=document.getElementById('s1');e.classList.remove('active');e.classList.add('done');document.getElementById('s2').classList.add('active');},900));
   stepTimers.push(setTimeout(()=>{const e=document.getElementById('s2');e.classList.remove('active');e.classList.add('done');document.getElementById('s3').classList.add('active');},6000));
 }
-async function run(name){
+async function run(name, force){
   suggest.classList.remove('show'); errMsg.style.display='none';
   q.value=name; q.blur();
   document.getElementById('landing').style.display='none';
@@ -237,9 +244,8 @@ async function run(name){
   document.getElementById('loadName').textContent=name+' 리포트 생성';
   setSteps();
   try{
-    const res=await fetch(`${API}?action=report&adv=${encodeURIComponent(name)}`);
+    const res=await fetch(`${API}?action=report&adv=${encodeURIComponent(name)}${force?'&ai=force':''}`);
     const data=await res.json();
-    if(data.error==='not_found'){ throw new Error(`'${name}' 을(를) 실적·영업일지·주간보고·경쟁매체 어디에서도 찾지 못했습니다.`); }
     if(data.error){ throw new Error(data.error); }
     stepTimers.forEach(clearTimeout);
     ['s1','s2','s3'].forEach(s=>{const e=document.getElementById(s);e.classList.remove('active');e.classList.add('done');});
@@ -298,11 +304,25 @@ function render(d){
       ? ins.acts.map((a,i)=>`<div class="act"><span class="n">${i+1}</span><div><b>${esc(a.b)}</b><div class="d2">${esc(a.d)}</div></div></div>`).join('')
       : `<div class="empty">인사이트 생성 결과가 없습니다.</div>`);
 
+  const aiSections = d.needsAiConfirm
+    ? `<div class="sec ai">
+        <div class="sec-h"><div><span class="no">04·05</span> <h3>AI 웹 검색 리포트</h3></div><span class="tag-ai">실행 대기</span></div>
+        <div class="confirm-card">
+          <div class="ct">'${esc(d.name)}' 은(는) 내부 기록이 없는 광고주입니다.</div>
+          <div class="cd">AI 웹 검색으로 브랜드 개요·최근 이슈·첫 제안 인사이트를 조사할 수 있습니다.<br>실행 시 <b>Claude API 비용이 발생</b>하니, 광고주명에 오타가 없는지 확인해 주세요.</div>
+          <button class="confirm-btn" onclick="run('${esc(d.name)}',true)">AI 웹 검색 실행</button>
+        </div>
+      </div>`
+    : `<div class="sec ai"><div class="sec-h"><div><span class="no">04</span> <h3>최근 이슈</h3></div><span class="tag-ai">AI 웹검색</span></div>${newsHtml}</div>
+  <div class="sec ai"><div class="sec-h"><div><span class="no">05</span> <h3>공략 인사이트</h3></div><span class="tag-ai">AI 생성 · 참고용</span></div>${insHtml}
+    <div class="disclaimer">⚠️ 04·05번은 AI가 웹검색과 내부 데이터를 바탕으로 생성한 참고 자료입니다. 광고주 미팅에서 인용하기 전 팩트 확인이 필요합니다.</div>
+  </div>`;
+
   R.innerHTML=`
   <div class="dossier">
     <div class="cat">${esc(d.industry||'')}${d.parent?' · '+esc(d.parent):''}${d.owner?' · 담당 '+esc(d.owner):''}</div>
     <h2>${esc(d.name)}</h2>
-    <div class="aliases">${d.registered===false?'⚠ 마스터 미등록 — 원본 데이터 직접 조회 (별칭·업종 등록 권장)':(d.aliases?'별칭: '+esc(d.aliases):'')}</div>
+    <div class="aliases">${d.noInternal?'🔍 내부 기록 없음 — 웹 검색 기반 신규 개척 리포트':(d.registered===false?'⚠ 마스터 미등록 — 원본 데이터 직접 조회 (별칭·업종 등록 권장)':(d.aliases?'별칭: '+esc(d.aliases):''))}</div>
     <div class="kpis">
       <div class="kpi"><div class="v">${fmtManwon(d.kpi&&d.kpi.total)}</div><div class="k">누적 집행${d.kpi&&d.kpi.lastMonth?' · 최근 '+esc(d.kpi.lastMonth):''}</div></div>
       <div class="kpi"><div class="v">${esc((d.kpi&&d.kpi.topMedia)||'—')}</div><div class="k">주요 매체</div></div>
@@ -313,10 +333,7 @@ function render(d){
   <div class="sec"><div class="sec-h"><div><span class="no">01</span> <h3>매체 집행 내역</h3></div><span class="tag-fact">내부 기록</span></div>${execHtml}</div>
   <div class="sec"><div class="sec-h"><div><span class="no">02</span> <h3>영업 접점 타임라인</h3></div><span class="tag-fact">내부 기록</span></div>${tlHtml}</div>
   <div class="sec"><div class="sec-h"><div><span class="no">03</span> <h3>경쟁매체 노출 현황</h3></div><span class="tag-fact">내부 기록</span></div>${compHtml}</div>
-  <div class="sec ai"><div class="sec-h"><div><span class="no">04</span> <h3>최근 이슈</h3></div><span class="tag-ai">AI 웹검색</span></div>${newsHtml}</div>
-  <div class="sec ai"><div class="sec-h"><div><span class="no">05</span> <h3>공략 인사이트</h3></div><span class="tag-ai">AI 생성 · 참고용</span></div>${insHtml}
-    <div class="disclaimer">⚠️ 04·05번은 AI가 웹검색과 내부 데이터를 바탕으로 생성한 참고 자료입니다. 광고주 미팅에서 인용하기 전 팩트 확인이 필요합니다.</div>
-  </div>
+  ${aiSections}
 
   <div class="gen-time">리포트 생성 ${ts}</div>
   <button class="pdf-btn" onclick="exportPdf('${esc(d.name)}')">PDF로 저장</button>
