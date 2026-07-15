@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>광고주 인텔리전스 · 비즈솔루션본부</title>
+<title>광고주 공략 리포트 자판기 · 비즈솔루션본부</title>
 <style>
 :root{
   --brand:#F6520A; --brand-deep:#FF3C13; --brand-tint:#FFF3ED;
@@ -23,6 +23,22 @@ body{
 .topbar{position:sticky;top:0;z-index:50;background:var(--ink);color:#fff;padding:14px 18px 12px}
 .topbar .org{font-size:11px;letter-spacing:.14em;color:var(--brand);font-weight:700}
 .topbar h1{font-size:17px;font-weight:800;letter-spacing:-.02em;margin-top:1px}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.userbox{display:flex;align-items:center;gap:8px;font-size:12px;color:#B8B8C0}
+.userbox button{padding:4px 10px;border:1px solid #3A3A42;border-radius:7px;background:none;color:#9A9AA3;font-size:11px;cursor:pointer}
+
+.login{padding:60px 22px}
+.login-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:26px 22px;max-width:340px;margin:0 auto}
+.login-card .lt{font-size:19px;font-weight:800;letter-spacing:-.02em}
+.login-card .ld{font-size:12.5px;color:var(--ink-soft);margin:6px 0 18px;line-height:1.5}
+.login-card input{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:9px;font-size:15px;margin-bottom:9px;outline:none;background:var(--paper)}
+.login-card input:focus{border-color:var(--brand)}
+.login-btn{width:100%;padding:13px;border:none;border-radius:9px;background:var(--brand);color:#fff;font-size:15px;font-weight:800;cursor:pointer;margin-top:4px}
+.login-btn:disabled{opacity:.5}
+.login-err{font-size:12.5px;color:var(--lose);margin-top:10px;min-height:16px}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:flex;align-items:center;justify-content:center;padding:22px}
+.modal-bg .login-card{width:100%}
+.modal-cancel{width:100%;padding:12px;border:1px solid var(--line);border-radius:9px;background:var(--card);font-size:14px;font-weight:700;color:var(--ink-soft);cursor:pointer;margin-top:8px}
 .searchwrap{position:relative;margin-top:12px}
 .searchwrap input{width:100%;padding:12px 14px 12px 40px;border:none;border-radius:10px;font-size:15px;background:#2A2A31;color:#fff;outline:none}
 .searchwrap input::placeholder{color:#7A7A85}
@@ -146,11 +162,43 @@ body{
 
 <div class="topbar">
   <div class="org">JOONGANG · 비즈솔루션본부</div>
-  <h1>광고주 인텔리전스</h1>
-  <div class="searchwrap">
+  <div class="topline">
+    <h1>광고주 공략 리포트 자판기</h1>
+    <div class="userbox" id="userbox" style="display:none">
+      <span id="userName"></span>
+      <button onclick="openPwModal()">비번변경</button>
+      <button onclick="logout()">로그아웃</button>
+    </div>
+  </div>
+  <div class="searchwrap" id="searchwrap" style="display:none">
     <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
     <input id="q" type="text" placeholder="광고주명 입력" autocomplete="off">
     <div class="suggest" id="suggest"></div>
+  </div>
+</div>
+
+<!-- 비밀번호 변경 -->
+<div class="modal-bg" id="pwModal" style="display:none">
+  <div class="login-card">
+    <div class="lt">비밀번호 변경</div>
+    <input id="pwCur" type="password" placeholder="현재 비밀번호" autocomplete="current-password">
+    <input id="pwNew" type="password" placeholder="새 비밀번호 (4자 이상)" autocomplete="new-password">
+    <input id="pwNew2" type="password" placeholder="새 비밀번호 확인" autocomplete="new-password">
+    <button class="login-btn" id="pwBtn" onclick="changePw()">변경</button>
+    <button class="modal-cancel" onclick="closePwModal()">취소</button>
+    <p class="login-err" id="pwErr"></p>
+  </div>
+</div>
+
+<!-- 로그인 -->
+<div class="login" id="loginView" style="display:none">
+  <div class="login-card">
+    <div class="lt">로그인</div>
+    <div class="ld">비즈솔루션본부 실적 대시보드와 동일한 계정을 사용합니다.<br>ID는 조인스ID 동일, 초기 비밀번호: 1234 입니다.<br>신규 ID 등록 문의: 신동민 팀장 (shin.dongmin@joongang.co.kr)</div>
+    <input id="loginId" type="text" placeholder="ID" autocomplete="username">
+    <input id="loginPw" type="password" placeholder="비밀번호" autocomplete="current-password">
+    <button class="login-btn" id="loginBtn" onclick="login()">로그인</button>
+    <p class="login-err" id="loginErr"></p>
   </div>
 </div>
 
@@ -175,6 +223,76 @@ body{
 <script>
 const API = 'https://script.google.com/macros/s/AKfycbwL_hT8TQiZ2DfyN6CbtST9vU1VNl2XUaNFel6atJD2zJAOybsO1BVHqowfBF-LOLSj/exec';
 const GRADE_LABEL = { S:'핵심 유지', A:'성장 공략', B:'윈백', D:'신규 개척' };
+
+// ── 세션 ──
+const AUTH = {
+  get token(){ try{return localStorage.getItem('advTok')||'';}catch(e){return window._tok||'';} },
+  get name(){ try{return localStorage.getItem('advName')||'';}catch(e){return window._name||'';} },
+  set(t,n){ try{localStorage.setItem('advTok',t);localStorage.setItem('advName',n);}catch(e){window._tok=t;window._name=n;} },
+  clear(){ try{localStorage.removeItem('advTok');localStorage.removeItem('advName');}catch(e){window._tok='';window._name='';} }
+};
+
+function showLogin(){
+  document.getElementById('loginView').style.display='block';
+  document.getElementById('searchwrap').style.display='none';
+  document.getElementById('userbox').style.display='none';
+  document.getElementById('landing').style.display='none';
+  document.getElementById('report').classList.remove('show');
+  document.getElementById('loading').classList.remove('show');
+}
+function showApp(){
+  document.getElementById('loginView').style.display='none';
+  document.getElementById('searchwrap').style.display='block';
+  document.getElementById('userbox').style.display='flex';
+  document.getElementById('userName').textContent=AUTH.name;
+  document.getElementById('landing').style.display='block';
+  renderChips();
+}
+async function login(){
+  const id=document.getElementById('loginId').value.trim();
+  const pw=document.getElementById('loginPw').value;
+  const btn=document.getElementById('loginBtn');
+  const err=document.getElementById('loginErr');
+  if(!id||!pw){err.textContent='ID와 비밀번호를 입력하세요.';return;}
+  btn.disabled=true; err.textContent='';
+  try{
+    const res=await fetch(`${API}?action=login&id=${encodeURIComponent(id)}&pw=${encodeURIComponent(pw)}`);
+    const data=await res.json();
+    if(data.ok){ AUTH.set(data.token,data.name); showApp(); }
+    else{ err.textContent=data.message||'로그인 실패'; }
+  }catch(e){ err.textContent='서버 연결 실패'; }
+  btn.disabled=false;
+}
+function logout(){ AUTH.clear(); showLogin(); }
+function authFail(){ AUTH.clear(); showLogin(); document.getElementById('loginErr').textContent='세션이 만료되었습니다. 다시 로그인하세요.'; }
+document.getElementById('loginPw').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
+
+// ── 비밀번호 변경 ──
+function openPwModal(){
+  ['pwCur','pwNew','pwNew2'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('pwErr').textContent='';
+  document.getElementById('pwModal').style.display='flex';
+}
+function closePwModal(){ document.getElementById('pwModal').style.display='none'; }
+async function changePw(){
+  const cur=document.getElementById('pwCur').value;
+  const nw=document.getElementById('pwNew').value;
+  const nw2=document.getElementById('pwNew2').value;
+  const err=document.getElementById('pwErr');
+  const btn=document.getElementById('pwBtn');
+  if(!cur||!nw){err.textContent='모든 항목을 입력하세요.';return;}
+  if(nw.length<4){err.textContent='새 비밀번호는 4자 이상이어야 합니다.';return;}
+  if(nw!==nw2){err.textContent='새 비밀번호가 서로 다릅니다.';return;}
+  btn.disabled=true; err.textContent='';
+  try{
+    const res=await fetch(`${API}?action=changepw&token=${encodeURIComponent(AUTH.token)}&oldpw=${encodeURIComponent(cur)}&newpw=${encodeURIComponent(nw)}`);
+    const data=await res.json();
+    if(data.error==='auth'){authFail();return;}
+    if(data.ok){ closePwModal(); alert('비밀번호가 변경되었습니다.'); }
+    else{ err.textContent=data.message||'변경 실패'; }
+  }catch(e){ err.textContent='서버 연결 실패'; }
+  btn.disabled=false;
+}
 
 const q = document.getElementById('q');
 const suggest = document.getElementById('suggest');
@@ -202,7 +320,8 @@ function renderChips(){
     (r.length? r : ['미우미우','올리브영','디아지오코리아'])
     .map(n=>`<button onclick="run('${esc(n)}')">${esc(n)}</button>`).join('');
 }
-renderChips();
+// ── 초기 화면: 세션 여부로 분기 ──
+if(AUTH.token){ showApp(); } else { showLogin(); }
 
 // ── 자동완성 (디바운스) ──
 let debounce=null;
@@ -212,11 +331,12 @@ q.addEventListener('input', ()=>{
   if(!v){suggest.classList.remove('show');return;}
   debounce=setTimeout(async ()=>{
     try{
-      const res=await fetch(`${API}?action=search&q=${encodeURIComponent(v)}`);
+      const res=await fetch(`${API}?action=search&q=${encodeURIComponent(v)}&token=${encodeURIComponent(AUTH.token)}`);
       const data=await res.json();
+      if(data.error==='auth'){authFail();return;}
       if(!data.items||!data.items.length){suggest.classList.remove('show');return;}
       suggest.innerHTML=data.items.map(it=>{
-        const tag = it.registered===false ? '마스터 미등록' : (it.matched?`"${esc(it.matched)}" 매칭`:'');
+        const tag = it.matched && it.registered ? `"${esc(it.matched)}" 매칭` : '';
         return `<button onclick="run('${esc(it.name)}')"><b>${esc(it.name)}</b><span class="alias">${tag}</span></button>`;
       }).join('');
       suggest.classList.add('show');
@@ -244,8 +364,9 @@ async function run(name, force){
   document.getElementById('loadName').textContent=name+' 리포트 생성';
   setSteps();
   try{
-    const res=await fetch(`${API}?action=report&adv=${encodeURIComponent(name)}${force?'&ai=force':''}`);
+    const res=await fetch(`${API}?action=report&adv=${encodeURIComponent(name)}&token=${encodeURIComponent(AUTH.token)}${force?'&ai=force':''}`);
     const data=await res.json();
+    if(data.error==='auth'){authFail();return;}
     if(data.error){ throw new Error(data.error); }
     stepTimers.forEach(clearTimeout);
     ['s1','s2','s3'].forEach(s=>{const e=document.getElementById(s);e.classList.remove('active');e.classList.add('done');});
@@ -322,7 +443,7 @@ function render(d){
   <div class="dossier">
     <div class="cat">${esc(d.industry||'')}${d.parent?' · '+esc(d.parent):''}${d.owner?' · 담당 '+esc(d.owner):''}</div>
     <h2>${esc(d.name)}</h2>
-    <div class="aliases">${d.noInternal?'🔍 내부 기록 없음 — 웹 검색 기반 신규 개척 리포트':(d.registered===false?'⚠ 마스터 미등록 — 원본 데이터 직접 조회 (별칭·업종 등록 권장)':(d.aliases?'별칭: '+esc(d.aliases):''))}</div>
+    <div class="aliases">${d.noInternal?'🔍 내부 기록 없음 — 웹 검색 기반 신규 개척 리포트':(d.aliases?'별칭: '+esc(d.aliases):'')}</div>
     <div class="kpis">
       <div class="kpi"><div class="v">${fmtManwon(d.kpi&&d.kpi.total)}</div><div class="k">누적 집행${d.kpi&&d.kpi.lastMonth?' · 최근 '+esc(d.kpi.lastMonth):''}</div></div>
       <div class="kpi"><div class="v">${esc((d.kpi&&d.kpi.topMedia)||'—')}</div><div class="k">주요 매체</div></div>
